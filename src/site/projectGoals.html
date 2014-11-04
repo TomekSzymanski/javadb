@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+<title>JavaDB project scope</title>
+</HEAD>
+
+
+Only release 1 scope is implemented.
+
+<body>
+<h3>Release 1</h3>
+<ul>
+    <li>Embedded mode</li>
+    <li>Database session</li>
+    <li>Very basic DDL support: only CREATE TABLE and DROP TABLE, </li>
+    <li>Very basic DML: INSERT, DELETE without WHERE, SELECT from one table without WHERE condition</li>
+    <li>Simple data types (for columns)</li>
+    <li>System dictionary</li>
+    <li>Data written to disk as pages. Support actual record layout as byte array</li>
+    <li>Buffer cache</li>
+</ul>
+
+<h3>Release 2</h3>
+<ul>
+    <li>JDBC driver, client-server mode (connectivity over TCP)</li>
+    <li>SELECT with joins, 3 join methods supported (relational query processor)</li>
+    <li>Indices, plain B-tree</li>
+</ul>
+
+<h3>Release 3</h3>
+<ul>
+    <li>UPDATE</li>
+    <li>Sorting (ORDER BY) : also with data sizes exceeding RAM (simulate with smaller Xmx): external sorts</li>
+    <li>Query optimiser, statistics</li>
+</ul>
+
+<h3>Release 4</h3>
+<ul>
+    <li>Any transaction support, ACID at best</li>
+    <li>Multi-user, concurrency</li>
+</ul>
+
+<h3>Scope backlog</h3>
+<ul>
+    <li>Basic authentication and authorization</li>
+    <li>Referential integrity (foreign keys)</li>
+    <li>Crash-recovery</li>
+    <li>Backup</li>
+    <li>Schemas (users)</li>
+    <li>UNION, GROUP BY</li>
+    <li>ALTER TABLE</li>
+    <li>Strong performance automated and regression testing</li>
+    <li>Encryption of network connections (client-server)</li>
+    <li>Stored procedures (in java) and java functions</li>
+    <li>Binary datatype</li>
+    <li>Triggers</li>
+    <li>Views</li>
+    <li>Temporary tables</li>
+    <li>Other indices (bitmap)</li>
+    <li>Partitioning</li>
+    <li>Role based access control</li>
+    <li>windowing functions</li>
+</ul>
+</body>
+</HTML>
