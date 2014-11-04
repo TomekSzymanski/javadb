@@ -24,6 +24,6 @@ public class CommandExecutorFactory {
     }
 
     public static QueryCommandExecutor getQueryExecutorInstance() {
-        return new SelectExecutor(storage, dictionary);
+        return new SelectExecutor();
     }
 }

@@ -1,11 +1,12 @@
 package executors;
 
 import clientapi.SQLException;
-import datamodel.Identifier;
-import datamodel.SQLDataType;
 import datamodel.DataTypeValue;
-import sqlparser.InsertCommand;
+import datamodel.Identifier;
+import datamodel.NullValue;
+import datamodel.SQLDataType;
 import sqlparser.AbstractSQLCommand;
+import sqlparser.InsertCommand;
 import storageapi.DataStoreException;
 import storageapi.Storage;
 import systemdictionary.SystemDictionary;
@@ -56,8 +57,8 @@ class InsertExecutor implements CommandExecutor {
                     SQLDataType columnDataType = dictionary.getColumnInfo(tableName, column).dataType;
                     DataTypeValue value = columnDataType.valueOf(valuesSpecifiedInINSERT.get(position));
                     valuesOfRecordToInsert.add(value);
-                } else { // column not specified in insert list, but it is nullable columns so we insert null
-                    valuesOfRecordToInsert.add(null);
+                } else { // column not specified in insert list, but it is nullable columns so we insert SQL null value
+                    valuesOfRecordToInsert.add(NullValue.NULL);
                 }
             }
         } else { // column list not specified, process value list along with column order in system dictionary

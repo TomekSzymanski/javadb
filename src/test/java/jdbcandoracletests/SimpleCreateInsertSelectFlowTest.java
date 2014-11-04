@@ -1,10 +1,12 @@
 package jdbcandoracletests;
 
-import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.*;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created on 2014-10-25.
@@ -25,13 +27,15 @@ public class SimpleCreateInsertSelectFlowTest {
     @Test
     public void testCreateInsertSelect() throws SQLException {
         boolean isResultSet = stmt.execute("SELECT * FROM customers");
-        Assert.assertTrue(isResultSet);
+        assertTrue(isResultSet);
 
         isResultSet = stmt.execute("insert into customers values (1,'atomek','whatever', null, 'N')");
-        Assert.assertFalse(isResultSet);
+        assertFalse(isResultSet);
 
         ResultSet rs = stmt.executeQuery("insert into customers values (100,'atomek','whatever', null, 'N')");
 
     }
+
+
 
 }

@@ -30,7 +30,7 @@ public abstract class AbstractSQLParser {
 
     private static final String[] RESERVED_KEYWORDS = {"SELECT", "CREATE", "FROM", "TABLE", "WHERE", "INSERT", "INTO", "VALUES", "DROP", "DELETE",
             "NOT", "NULL",
-            "NUMBER", "VARCHAR", "BOOLEAN"}; // TODO add ASTERISK to reserved keywords, but then SelectSQLParser must product Strings for column lists not Identifiers
+            "NUMBER", "VARCHAR", "BOOLEAN", ASTERISK};
 
     public static boolean isReservedKeyword(String value) {
         for (String keyword : RESERVED_KEYWORDS) {
@@ -67,7 +67,7 @@ public abstract class AbstractSQLParser {
         return tokensBefore;
     }
 
-    List<String> parseCommaSeparatedList(List<String> list) throws IllegalArgumentException {
+    List<String> parseCommaSeparatedList(List<String> list) throws SQLParseException {
         List<String> elements = new ArrayList<>();
         if (list.size() == 0) {
             throw new IllegalArgumentException("Comma separated list is empty");
@@ -78,7 +78,7 @@ public abstract class AbstractSQLParser {
         for (int idx = 1; idx < list.size();) {
             // first we have to meet comma
             if (!list.get(idx++).equals(COMMA)) {
-                throw new IllegalArgumentException("Missing comma in comma separated list");
+                throw new SQLParseException("Missing comma in list that should be comma separated");
             }
             // and then column name
             elements.add(list.get(idx++));

@@ -45,10 +45,15 @@ class IteratorBasedResultSet implements ResultSet {
      */
     @Override
     public  boolean getBoolean(String columnLabel) throws SQLException {
+        return getBoolean(findColumn(columnLabel));
+    }
+
+    @Override
+    public int findColumn(String columnLabel) {
         if (!columnLabels.contains(columnLabel)) {
             throw new SQLException("there is no column \"" + columnLabel + "\" in query results");
         }
-        return getBoolean(columnLabels.indexOf(columnLabel));
+        return columnLabels.indexOf(columnLabel);
     }
 
 
@@ -58,13 +63,9 @@ class IteratorBasedResultSet implements ResultSet {
     }
 
 
-
     @Override
     public int getInt(String columnLabel) throws SQLException {
-        if (!columnLabels.contains(columnLabel)) {
-            throw new SQLException("there is no column \"" + columnLabel + "\" in query results");
-        }
-        return getInt(columnLabels.indexOf(columnLabel));
+        return getInt(findColumn(columnLabel));
     }
 
 
@@ -98,10 +99,7 @@ class IteratorBasedResultSet implements ResultSet {
     }
 
     public String getString(String columnLabel) throws SQLException {
-        if (!columnLabels.contains(columnLabel)) {
-            throw new SQLException("there is no column \"" + columnLabel + "\" in query results");
-        }
-        return getString(columnLabels.indexOf(columnLabel));
+        return getString(findColumn(columnLabel));
     }
 
 }

@@ -41,7 +41,7 @@ import java.util.List;
 
    <number> ::=  [0-9]+
 
-   <quoted_string> ::= '"' .+ '"'
+   <quoted_string> ::= ''' .+ '''
 
  */
 class SelectSQLParser extends AbstractSQLParser implements SQLStatementParser {
@@ -58,7 +58,7 @@ class SelectSQLParser extends AbstractSQLParser implements SQLStatementParser {
         expect(tokenizer, SELECT, "Select statement does not contain SELECT clause");
 
         List<String> columnList = createListFromAllTokensBefore(tokenizer, FROM);
-        parseSelectList(columnList);
+        parseSelectList(tokenizer, columnList);
 
         parseTableExpression(tokenizer);
 
@@ -66,13 +66,18 @@ class SelectSQLParser extends AbstractSQLParser implements SQLStatementParser {
     }
 
     /*
-    <SELECT_LIST>  ::= <asterisk> | <identifier> [ { <comma> <identifier> }... ]
+    <SELECT_LIST>  ::= <asterisk> | <identifier> | <quoted_string> [ { <comma> <identifier> | <quoted_string> }... ]
      */
-    private void parseSelectList(List<String> columnList) throws SQLParseException {
+    private void parseSelectList(Tokenizer tokenizer, List<String> columnList) throws SQLParseException {
         if (columnList.size() == 0) {
             throw new SQLParseException("No column list provided");
         }
-        ast.addColumns(parseIdentifierList(columnList));
+        // either asterisk ONLY or the select list
+        if (tokenizer.peek().equals(ASTERISK)) {
+            ast.addSelectListElement(tokenizer.next()); // TODO refactor such constructs into separate tokenizer method
+        } else {
+            ast.addSelectListElements(parseCommaSeparatedList(columnList));
+        }
     }
 
     /*

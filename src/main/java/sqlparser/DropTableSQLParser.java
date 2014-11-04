@@ -7,11 +7,9 @@ import datamodel.Identifier;
  */
 class DropTableSQLParser extends AbstractSQLParser implements SQLStatementParser {
 
-    private DropTableCommand ast;
-
     @Override
     AbstractSQLCommand parse(Tokenizer tokenizer) throws SQLParseException {
-        ast = new DropTableCommand();
+        DropTableCommand ast = new DropTableCommand();
         // expect DROP TABLE
         expect(tokenizer, DROP, "Drop table statements does not contain DROP keyword");
         expect(tokenizer, TABLE, "Drop table statements does not contain TABLE keyword");

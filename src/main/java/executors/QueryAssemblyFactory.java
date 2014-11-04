@@ -6,7 +6,6 @@ import sqlparser.SelectCommand;
 import systemdictionary.SystemDictionary;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -18,22 +17,27 @@ class QueryAssemblyFactory {
 
     static QueryAssembly getInstance(SelectCommand selectSQLCommand) {
         Identifier tableName = selectSQLCommand.getTableList().get(0);
-        List<Identifier> columnList = selectSQLCommand.getColumnList();
-        List<Identifier> columnExpandedList;
-        if (isOnlyAsteriskSpecified(columnList)) {
-            columnExpandedList = new ArrayList<>();
-            for (Iterator<Identifier> it = dictionary.getTableColumnNames(tableName).iterator(); it.hasNext(); ) {
-                columnExpandedList.add(it.next());
-            }
-        } else {
-            columnExpandedList = columnList;
-        }
+        List<String> selectListElements = selectSQLCommand.getSelectList();
+        List<Identifier> columnExpandedList = expandAsteriskIntoColumns(tableName, selectListElements);
         return new TableSelector(tableName, columnExpandedList);
     }
 
-    private static boolean isOnlyAsteriskSpecified(List<Identifier> columnList) {
-        return ((columnList.size() == 1) && (columnList.get(0).equals(AbstractSQLParser.ASTERISK)));
+    private static List<Identifier> expandAsteriskIntoColumns(Identifier tableName, List<String> columnList) {
+        List<Identifier> columnExpandedList = new ArrayList<>();
+        if (isOnlyAsteriskSpecified(columnList)) {
+            for (Identifier identifier : dictionary.getTableColumnNames(tableName)) {
+                columnExpandedList.add(identifier);
+            }
+        } else {
+            for (String column : columnList) {
+                columnExpandedList.add(new Identifier(column));
+            }
+        }
+        return columnExpandedList;
     }
 
+    private static boolean isOnlyAsteriskSpecified(List<String> columnList) {
+        return ((columnList.size() == 1) && (columnList.get(0).equals(AbstractSQLParser.ASTERISK)));
+    }
 
 }

@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class PageDataDirectory {
     Map<Integer, RecordInfo> records = new HashMap<>();
-    List<Integer> deletedRecords = new LinkedList<Integer>();
+    List<Integer> deletedRecords = new LinkedList<>();
     private int nextRecordId = 0; // next inserted record will get this ID
 
     private int endOfDataArea;

@@ -18,7 +18,7 @@ public class InsertCommand extends AbstractSQLCommand {
     private Identifier tableName;
     private List<Identifier> columnList = new ArrayList<>(); // columnList may be empty
 
-    private List<String> values = new ArrayList<String>(); // values list cannot be empty
+    private List<String> values = new ArrayList<>(); // values list cannot be empty
 
     public Identifier getTableName() {
         return tableName;

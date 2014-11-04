@@ -122,6 +122,41 @@ public class TokenizerTest {
         verifyAllTokensReturned(t, new String[] {"T1.col", ">=", "T2.col", "and",  "T2.col", "<=", "34", "and", "T2.colz", ">=", "4"});
     }
 
+    @Test
+    public void singleQuotesToEncloseStrings() {
+        SimpleTokenizer t = new SimpleTokenizer(" 'hello' 'hello world' ");
+        assertEquals("hello",  t.next());
+        assertEquals("hello world",  t.next());
+    }
+
+    // A “'” inside a string quoted with “'” may be written as “''”.
+    @Test
+    public void singleQuoteByPrecedingWithAnotherSingleQuote() {
+        SimpleTokenizer t = new SimpleTokenizer(" '''hello world' ");
+        assertEquals("'hello world",  t.next());
+    }
+
+    @Test
+    public void specialCharacterInsideStrings() {
+        SimpleTokenizer t = new SimpleTokenizer(" 'SELECT < T (' DONE ");
+        assertEquals("SELECT < T (",  t.next());
+        assertEquals("DONE",  t.next());
+    }
+
+    // Precede the quote character by an escape character (“\”).
+    @Test
+    public void singleQuoteByPrecedingWithEscapeCharacter() {
+        SimpleTokenizer t = new SimpleTokenizer("'\\'hello world\\'' ");
+        assertEquals("'hello world'",  t.next());
+    }
+
+    @Test
+    public void escapedBackslashRecognized() {
+        SimpleTokenizer t = new SimpleTokenizer(" 'hello' 'hello \\ world' ");
+        assertEquals("hello",  t.next());
+        assertEquals("hello \\ world",  t.next());
+    }
+
 
     private void verifyAllTokensReturned(SimpleTokenizer t, String[] expectedTokens) {
         for (String expected : expectedTokens) {

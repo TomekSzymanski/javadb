@@ -16,12 +16,6 @@ public class Column {
         this.isNotNull = isNotNull;
     }
 
-    public Column(Identifier columnName, SQLDataType dataType) {
-
-        this.columnName = columnName;
-        this.dataType = dataType;
-    }
-
 
     @Override
     public boolean equals(Object o) {

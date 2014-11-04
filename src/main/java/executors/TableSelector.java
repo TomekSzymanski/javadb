@@ -15,8 +15,6 @@ import java.util.List;
  */
 class TableSelector implements QueryAssembly {
 
-    static final String ASTERISK= "*"; // TODO move it all to datamodel?
-
     private static Storage storage = CollectionBasedInMemoryStorage.getInstance();
     private Iterator<List<? extends DataTypeValue>> tableIterator;
     private List<String> columnLabels = new ArrayList<>();

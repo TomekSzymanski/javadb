@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created on 2014-11-03.
  */
-public class Insert {
+public class InsertTest {
 
     private static Statement stmt;
 
@@ -28,7 +28,7 @@ public class Insert {
         final String TEST_TABLE_NAME = "InsertNullableColumns";
         try {
 
-
+            // TODO add here and with DROP check if table does (not) exist (read metadata)
             stmt.execute("CREATE TABLE " + TEST_TABLE_NAME + " (a NUMBER NOT NULL, b NUMBER)");
 
             // when you specify INSERT not specifying nullable column
@@ -40,7 +40,6 @@ public class Insert {
             assertEquals(1, rs.getInt("a"));
             assertEquals(null, rs.getString("b"));
             assertEquals(0, rs.getInt("b"));
-            // TODO assertEquals(0, rs.getFloat("b"), 0);
             assertEquals(false, rs.getBoolean("b"));
         } finally {
             // tear down

@@ -13,9 +13,9 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created on 2014-10-27.
  */
-public class SimpleInsertAndSelectAllColumns {
+public class SimpleInsertAndSelectAllColumnsTest {
 
-    private final static String TEST_TABLE_NAME = SimpleInsertAndSelectAllColumns.class.getSimpleName() + "_customers";
+    private final static String TEST_TABLE_NAME = SimpleInsertAndSelectAllColumnsTest.class.getSimpleName() + "_customers";
 
     private static Statement statement;
 
@@ -55,7 +55,7 @@ public class SimpleInsertAndSelectAllColumns {
             assertEquals(2, rs.getInt(0));
             assertEquals("romek", rs.getString(1));
             assertEquals("whatever", rs.getString(2));
-            assertEquals(null, rs.getInt(3));
+            assertEquals(0, rs.getInt(3));
             assertEquals(true, rs.getBoolean(4));
 
             assertTrue(rs.next());
@@ -63,7 +63,7 @@ public class SimpleInsertAndSelectAllColumns {
             assertEquals(3, rs.getInt(0));
             assertEquals("atomek", rs.getString(1));
             assertEquals("whatever", rs.getString(2));
-            assertEquals(null, rs.getInt(3));
+            assertEquals(0, rs.getInt(3));
             assertEquals(false, rs.getBoolean(4));
 
             assertFalse(rs.next());
@@ -112,8 +112,8 @@ public class SimpleInsertAndSelectAllColumns {
             assertEquals("whatever", rs.getString(2));
             assertEquals("whatever", rs.getString("surname"));
 
-            assertEquals(null, rs.getInt(3));
-            assertEquals(null, rs.getInt("age"));
+            assertEquals(0, rs.getInt(3));
+            assertEquals(0, rs.getInt("age"));
 
             assertEquals(true, rs.getBoolean(4));
             assertEquals(true, rs.getBoolean("active"));

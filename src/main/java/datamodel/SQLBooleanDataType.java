@@ -23,10 +23,10 @@ public class SQLBooleanDataType extends SQLDataType {
 
     @Override
     public DataTypeValue valueOfNotNull(String stringValue) {
-        if (stringValue.equalsIgnoreCase("true") || stringValue.equalsIgnoreCase("'Y'")) {
+        if (stringValue.equalsIgnoreCase("true") || stringValue.equalsIgnoreCase("Y")) {
             return BooleanValue.TRUE;
         }
-        if (stringValue.equalsIgnoreCase("false") || stringValue.equalsIgnoreCase("'N'")) {
+        if (stringValue.equalsIgnoreCase("false") || stringValue.equalsIgnoreCase("N")) {
             return BooleanValue.FALSE;
         }
         throw new IllegalArgumentException("Cannot assign " + stringValue + " for BOOLEAN field");

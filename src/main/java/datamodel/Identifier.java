@@ -8,7 +8,7 @@ import sqlparser.AbstractSQLParser;
  */
 public class Identifier {
 
-    public final static int MAX_IDENTIFIER_LENGTH = 30;
+    public final static int MAX_IDENTIFIER_LENGTH = 60;
 
     private final String value;
 

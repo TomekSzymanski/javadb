@@ -1,12 +1,17 @@
 package sqlparser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Created on 2014-10-03.
  */
 public class SimpleTokenizer implements Iterator<String>,Tokenizer {
 
+    private static final char SINGLE_QUOTE = '\'';
+    private static final char ESCAPE_CHAR = '\\';
     private List<String> tokens = new ArrayList<>();
     private int position;
 
@@ -17,20 +22,42 @@ public class SimpleTokenizer implements Iterator<String>,Tokenizer {
         tokenize(input);
     }
 
-    private void tokenize(String input) {
+    private void tokenize(String input) { // TODO rewrite this method, perhaps with state or state machine, it is not too complex
         // tokenize user input at object creation, put tokens into tokens List
         StringBuffer nextToken = new StringBuffer(); // accumulator for characters that will create nextToken
+        boolean withinQuotedString = false; // control flag to remember that we are inside quoted string
         for (int pos = 0; pos < input.length(); pos++) {
             char nextChar = input.charAt(pos);
 
+            if (nextChar == SINGLE_QUOTE && !withinQuotedString) {
+                withinQuotedString = true;
+                continue;
+            }
+
+            if (withinQuotedString && (nextChar == SINGLE_QUOTE || nextChar == ESCAPE_CHAR)) {
+                if (pos + 1 < input.length()) {// more characters in the input
+                    if (input.charAt(pos + 1) == SINGLE_QUOTE) {
+                        nextToken.append(input.charAt(pos + 1));
+                        pos++; // WARN
+                        continue;
+                    }
+                }
+            }
+
+
             // if whitespace met, and we accumulated anything in nextToken, then emit nextToken
-            if ((Character.isWhitespace(nextChar) || isSeparatingToken(nextChar)) && nextToken.length() > 0) {
+            if (( (!withinQuotedString && (Character.isWhitespace(nextChar) || isSeparatingToken(nextChar)))
+                    || (withinQuotedString && nextChar == SINGLE_QUOTE)) && nextToken.length() > 0) {
                 tokens.add(nextToken.toString());
                 nextToken.delete(0, nextToken.length()); // clear accumulator
-            } else if (!Character.isWhitespace(nextChar) && !isSeparatingToken(nextChar)) { // accumulate if not whitespace and not separating token
+                if (withinQuotedString) {
+                    withinQuotedString = false;
+                }
+            } else if ((!Character.isWhitespace(nextChar) && !isSeparatingToken(nextChar))
+                            || withinQuotedString) { // accumulate if not whitespace and not separating token, or we are within quoted string
                 nextToken.append(nextChar);
             }
-            if (isSeparatingToken(nextChar)) {
+            if (!withinQuotedString && isSeparatingToken(nextChar)) {
                 String separatingToken = String.valueOf(nextChar);
                 if (pos + 1 < input.length()) { // there are more characters in input, check if this char and next char form a two character separating token
                     char nextNextChar = input.charAt(pos + 1);

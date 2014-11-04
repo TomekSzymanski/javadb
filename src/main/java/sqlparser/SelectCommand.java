@@ -14,19 +14,17 @@ public class SelectCommand extends AbstractSQLCommand {
     public Type getType() {
         return Type.SelectCommand;
     }
-    private final List<Identifier> columnList = new ArrayList<>();
+    private final List<String> selectList = new ArrayList<>(); // it cannot be Identifier list, as in the column specification we may have columns (Identifiers), but also strings or asterisk
     private final List<Identifier> tableList = new ArrayList<>();
 
     //private WhereClauseSqlAST whereConditions;
 
-    void addColumn(Identifier columnName) {
-        columnList.add(columnName);
+    void addSelectListElement(String columnName) {
+        selectList.add(columnName);
     }
 
-    void addColumns(List<Identifier> identifiers) {
-        for (Identifier identifier : identifiers) {
-            addColumn(identifier);
-        }
+    void addSelectListElements(List<String> identifiers) {
+        selectList.addAll(identifiers);
     }
 
     void addTable(Identifier tableName) {
@@ -34,15 +32,12 @@ public class SelectCommand extends AbstractSQLCommand {
     }
 
     void addTables(List<Identifier> identifiers) {
-        for (Identifier identifier : identifiers) {
-            addTable(identifier);
-        }
+        tableList.addAll(identifiers);
     }
 
-    public List<Identifier> getColumnList() {
-        return columnList;
+    public List<String> getSelectList() {
+        return selectList;
     }
-
 
     public List<Identifier> getTableList() {
         return tableList;

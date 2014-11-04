@@ -17,4 +17,6 @@ public interface ResultSet {
     String getString(String columnLabel) throws SQLException;
 
     String getString(int columnIndex) throws SQLException;
+
+    int findColumn(String columnLabel);
 }

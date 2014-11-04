@@ -15,8 +15,8 @@ public class SelectSQLParserTest {
         TokenizerMock tokens = new TokenizerMock(new String[]{"SELECT", "*", "FROM", "TABLE1"});
         SelectCommand ast = parser.parse(tokens);
 
-        assertEquals(1, ast.getColumnList().size());
-        assertEquals("*", ast.getColumnList().get(0).getValue());
+        assertEquals(1, ast.getSelectList().size());
+        assertEquals("*", ast.getSelectList().get(0));
 
         assertEquals(1, ast.getTableList().size());
         assertEquals("TABLE1", ast.getTableList().get(0).getValue());
@@ -28,9 +28,9 @@ public class SelectSQLParserTest {
         TokenizerMock tokens = new TokenizerMock(new String[]{"SELECT", "column1", ",", "column2", "FROM", "TABLE1"});
         SelectCommand ast = parser.parse(tokens);
 
-        assertEquals(2, ast.getColumnList().size());
-        assertEquals("column1", ast.getColumnList().get(0).getValue());
-        assertEquals("column2", ast.getColumnList().get(1).getValue());
+        assertEquals(2, ast.getSelectList().size());
+        assertEquals("column1", ast.getSelectList().get(0));
+        assertEquals("column2", ast.getSelectList().get(1));
 
         assertEquals(1, ast.getTableList().size());
         assertEquals("TABLE1", ast.getTableList().get(0).getValue());

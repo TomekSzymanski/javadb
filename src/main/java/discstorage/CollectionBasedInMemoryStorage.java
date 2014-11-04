@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class CollectionBasedInMemoryStorage implements Storage {
 
-    private Map<Identifier, List<List<? extends DataTypeValue>>> tablesRecords = new HashMap<>();
+    private final Map<Identifier, List<List<? extends DataTypeValue>>> tablesRecords = new HashMap<>();
 
     private static CollectionBasedInMemoryStorage INSTANCE;
 

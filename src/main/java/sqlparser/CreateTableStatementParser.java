@@ -86,7 +86,7 @@ class CreateTableStatementParser extends AbstractSQLParser implements SQLStateme
                 fieldSizeSpecifiers = parseFieldSizeSpecification(tokenizer);
             }
 
-            SQLDataType columnDataType = null;
+            SQLDataType columnDataType;
             try {
                 columnDataType = SQLDataTypeFactory.getInstance(dataTypeString, fieldSizeSpecifiers);
             } catch (IllegalArgumentException e) {
@@ -122,7 +122,7 @@ class CreateTableStatementParser extends AbstractSQLParser implements SQLStateme
 
         // for example VARCHAR(30), NUMBER(10,2)
 
-        List<String> fieldSizeSpecsStrings = null;
+        List<String> fieldSizeSpecsStrings;
         try {
             fieldSizeSpecsStrings = parseCommaSeparatedList(createListFromAllTokensBefore(tokenizer, RIGHT_PAREN));
         } catch (IllegalArgumentException e) {
