@@ -1,6 +1,7 @@
 package datamodel;
 
 import clientapi.SQLException;
+import org.apache.commons.lang3.Validate;
 
 import java.util.List;
 
@@ -24,14 +25,10 @@ public class SQLDataTypeFactory {
                 }
                 throw new IllegalArgumentException("When specifying precision for NUMBER data type you can specify either precision, or precision and scale");
             case SQLDataType.BOOLEAN:
-                if (numberOfFieldSizeSpecifiers != 0) {
-                    throw new IllegalArgumentException("cannot specify field size for BOOLEAN data type");
-                }
+                Validate.isTrue(numberOfFieldSizeSpecifiers==0, "cannot specify field size for BOOLEAN data type");
                 return SQLBooleanDataType.getInstance();
             case SQLDataType.VARCHAR:
-                if (numberOfFieldSizeSpecifiers != 1) {
-                    throw new IllegalArgumentException("exactly one field size specifier must be specified for VARCHAR");
-                }
+                Validate.isTrue(numberOfFieldSizeSpecifiers==1, "exactly one field size specifier must be specified for VARCHAR");
                 return SQLVarcharDataType.getInstance(fieldSizeSpecifiers.get(0));
             default:
                 throw new SQLException("Unrecognized column data type " + dataTypeString);

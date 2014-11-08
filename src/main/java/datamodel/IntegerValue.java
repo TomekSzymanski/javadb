@@ -21,6 +21,11 @@ public class IntegerValue extends DataTypeValue {
     }
 
     @Override
+    public long longValue() {
+        return (long) value;
+    }
+
+    @Override
     public float floatValue() {
         return (float) value;
     }

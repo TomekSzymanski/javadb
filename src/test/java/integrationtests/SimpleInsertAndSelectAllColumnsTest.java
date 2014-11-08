@@ -13,15 +13,15 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created on 2014-10-27.
  */
-public class SimpleInsertAndSelectAllColumnsTest {
+public class SimpleInsertAndSelectAllColumnsTest extends IntegrationTestsBase {
 
     private final static String TEST_TABLE_NAME = SimpleInsertAndSelectAllColumnsTest.class.getSimpleName() + "_customers";
 
+    private static final Connection connection = new Connection();
     private static Statement statement;
 
     @Before
     public void setUp() throws SQLException {
-        Connection connection = new Connection();
         statement = connection.createStatement();
         String CREATE_TABLE_SQL = "CREATE TABLE " + TEST_TABLE_NAME + " (" +
                 "    id number not null,\n" +
@@ -30,7 +30,7 @@ public class SimpleInsertAndSelectAllColumnsTest {
                 "    age number,\n" +
                 "    active boolean not null\n" +
                 ")";
-        statement.executeUpdate(CREATE_TABLE_SQL);
+        createTestTable(connection, TEST_TABLE_NAME, CREATE_TABLE_SQL);
     }
 
     @Test
@@ -48,6 +48,7 @@ public class SimpleInsertAndSelectAllColumnsTest {
             assertEquals("tomek", rs.getString(1));
             assertEquals("szymanski", rs.getString(2));
             assertEquals(33, rs.getInt(3));
+            assertEquals(33, rs.getLong(3));
             assertEquals(true, rs.getBoolean(4));
 
             assertTrue(rs.next());
@@ -130,7 +131,7 @@ public class SimpleInsertAndSelectAllColumnsTest {
 
     @After
     public void tearDown() throws SQLException {
-        statement.executeUpdate("DROP TABLE " + TEST_TABLE_NAME);
+        dropTestTable(connection, TEST_TABLE_NAME);
     }
 
 }

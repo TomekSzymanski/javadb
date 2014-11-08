@@ -13,10 +13,11 @@ public class CommandExecutorFactory {
     private static Storage storage = CollectionBasedInMemoryStorage.getInstance();
     private static SystemDictionary dictionary = SystemDictionary.getInstance();
 
-    public static CommandExecutor getInstance(AbstractSQLCommand.Type commandType) {
+    public static CommandExecutor getInstance(AbstractSQLCommand.Type commandType) { // TODO: cache those instances
         switch (commandType) {
-            case InsertCommand: return new InsertExecutor(storage, dictionary);
+            case InsertCommand: return new InsertExecutor(storage, dictionary); // TODO make system dictionary singleton, do not need to pass references to it.
             case CreateTableCommand: return new CreateTableExecutor(storage, dictionary);
+            case DeleteCommand: return new DeleteTableExecutor(storage);
             case DropTableCommand: return new DropTableExecutor(storage, dictionary);
             default:
                 throw new IllegalArgumentException("Cannot build executor for SQL command");

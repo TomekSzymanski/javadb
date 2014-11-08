@@ -1,6 +1,7 @@
 package sqlparser;
 
 import datamodel.Identifier;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +46,7 @@ public class InsertCommand extends AbstractSQLCommand {
     }
 
     void setValuesList(List<String> values) {
-        if (!columnList.isEmpty() && (columnList.size() < values.size())) {
-            throw new IllegalArgumentException("If column list is specified then you cannot add more values than columns");
-        }
+        Validate.isTrue((columnList.isEmpty()) || (values.size() <= columnList.size()), "If column list is specified then you cannot add more values than columns");
         this.values = values;
     }
 
@@ -57,9 +56,7 @@ public class InsertCommand extends AbstractSQLCommand {
      * @param value
      */
     void addValue(String value) {
-        if (!columnList.isEmpty() && (columnList.size() < values.size())) {
-            throw new IllegalArgumentException("If column list is specified then you cannot add more values than columns");
-        }
+        Validate.isTrue((columnList.isEmpty()) || (values.size() <= columnList.size()), "If column list is specified then you cannot add more values than columns");
         values.add(value);
     }
 }

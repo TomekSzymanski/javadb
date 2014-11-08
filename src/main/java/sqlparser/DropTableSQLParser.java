@@ -5,7 +5,7 @@ import datamodel.Identifier;
 /**
  * Created on 2014-10-27.
  */
-class DropTableSQLParser extends AbstractSQLParser implements SQLStatementParser {
+class DropTableSQLParser extends AbstractSQLParser  {
 
     @Override
     AbstractSQLCommand parse(Tokenizer tokenizer) throws SQLParseException {

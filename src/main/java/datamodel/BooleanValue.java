@@ -24,6 +24,11 @@ public class BooleanValue extends DataTypeValue {
     }
 
     @Override
+    public long longValue() {
+        throw new IllegalArgumentException("cannot cast boolean to long");
+    }
+
+    @Override
     public float floatValue() {
         throw new IllegalArgumentException("cannot cast boolean to float");
     }

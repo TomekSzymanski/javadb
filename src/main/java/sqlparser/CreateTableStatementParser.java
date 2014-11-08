@@ -32,7 +32,7 @@ import java.util.List;
     <comma> ::= ,
 
  */
-class CreateTableStatementParser extends AbstractSQLParser implements SQLStatementParser {
+class CreateTableStatementParser extends AbstractSQLParser {
 
     private CreateTableCommand ast;
 

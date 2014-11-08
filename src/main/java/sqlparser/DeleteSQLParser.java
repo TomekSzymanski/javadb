@@ -5,7 +5,7 @@ import datamodel.Identifier;
 /**
  * Created on 2014-10-27.
  */
-class DeleteSQLParser extends AbstractSQLParser implements SQLStatementParser { // TODO:D: why declaring implements interface here as it is declared with abstract class
+class DeleteSQLParser extends AbstractSQLParser {
 
     @Override
     AbstractSQLCommand parse(Tokenizer tokenizer) throws SQLParseException {

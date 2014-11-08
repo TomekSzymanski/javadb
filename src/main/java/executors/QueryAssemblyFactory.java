@@ -15,11 +15,11 @@ class QueryAssemblyFactory {
 
     private static SystemDictionary dictionary = SystemDictionary.getInstance();
 
-    static QueryAssembly getInstance(SelectCommand selectSQLCommand) {
+    static QueryAssembly getInstance(SelectCommand selectSQLCommand, ExecutionContext context) {
         Identifier tableName = selectSQLCommand.getTableList().get(0);
         List<String> selectListElements = selectSQLCommand.getSelectList();
         List<Identifier> columnExpandedList = expandAsteriskIntoColumns(tableName, selectListElements);
-        return new TableSelector(tableName, columnExpandedList);
+        return new TableSelector(tableName, columnExpandedList, context);
     }
 
     private static List<Identifier> expandAsteriskIntoColumns(Identifier tableName, List<String> columnList) {

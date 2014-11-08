@@ -4,10 +4,8 @@ import datamodel.Column;
 import datamodel.Identifier;
 import datamodel.Table;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created on 2014-10-21.
@@ -35,6 +33,16 @@ public class SystemDictionary {
         }
     }
 
+    public List<Table> getTables(String tableNameRegex) {
+        List<Table> tables = new ArrayList<>();
+        for (Table table : registeredTables.values()) {
+            Identifier tableName = table.getTableName();
+            if (Pattern.matches(tableNameRegex, tableName.getValue())) {
+                tables.add(table);
+            }
+        }
+        return tables;
+    }
 
     public Collection<Identifier> getTableColumnNames(Identifier tableName) {
         return registeredTables.get(tableName).getColumnNames();

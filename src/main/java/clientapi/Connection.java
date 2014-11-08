@@ -20,7 +20,7 @@ public class Connection implements AutoCloseable {
      */
     public DatabaseMetaData getMetaData() {
 //        return SystemDictionary.getInstance().getDatabaseMetaData();
-        return null;
+        return new DatabaseMetaData();
     }
 
     /**

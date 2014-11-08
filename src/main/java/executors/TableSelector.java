@@ -19,15 +19,18 @@ class TableSelector implements QueryAssembly {
     private Iterator<List<? extends DataTypeValue>> tableIterator;
     private List<String> columnLabels = new ArrayList<>();
 
-    TableSelector(Identifier tableName, List<Identifier> columnList) {
+    private ExecutionContext context;
+
+    TableSelector(Identifier tableName, List<Identifier> columnList, ExecutionContext context) {
         tableIterator = storage.tableIterator(tableName);
         for (Identifier column : columnList) {
             columnLabels.add(column.getValue());
         }
+        this.context = context;
     }
 
     @Override
     public ResultSet getResultSet() {
-        return new IteratorBasedResultSet(tableIterator, columnLabels);
+        return new IteratorBasedResultSet<>(tableIterator, columnLabels, context);
     }
 }

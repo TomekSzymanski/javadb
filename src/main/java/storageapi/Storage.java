@@ -20,4 +20,6 @@ public interface Storage {
     List<List<? extends DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException;
 
     Iterator<List<? extends DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException;
+
+    void deleteAll(Identifier tableName);
 }

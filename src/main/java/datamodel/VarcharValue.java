@@ -21,6 +21,11 @@ public class VarcharValue extends DataTypeValue {
     }
 
     @Override
+    public long longValue() {
+        return Long.parseLong(value);
+    }
+
+    @Override
     public float floatValue() {
         return Float.parseFloat(value);
     }

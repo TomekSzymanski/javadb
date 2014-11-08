@@ -14,9 +14,9 @@ import java.util.List;
 
  <value_expression_list> ::= <left paren> <value_expr> [ {<comma> <value_expr>} ] <right paren>
  */
-class InsertSQLParser extends AbstractSQLParser implements SQLStatementParser {
+class InsertSQLParser extends AbstractSQLParser  {
 
-    private final InsertCommand ast = new InsertCommand();
+    private InsertCommand ast;
 
     /*
      INSERT INTO <TABLE_NAME> <insert_columns_and_values>
@@ -24,7 +24,7 @@ class InsertSQLParser extends AbstractSQLParser implements SQLStatementParser {
      <insert_columns_and_values> ::= <column_list_specification> VALUES  <value_expression_list>
      */
     InsertCommand parse(Tokenizer tokenizer) throws SQLParseException {
-
+        ast = new InsertCommand(); // new command must be created for every new parse INSERT requests
         // expect INSERT INTO
         expect(tokenizer, INSERT, "Insert statement does not contain INSERT INTO clause");
         expect(tokenizer, INTO, "Insert statement does not contain INSERT INTO clause");

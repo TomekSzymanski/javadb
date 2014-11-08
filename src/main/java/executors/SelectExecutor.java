@@ -8,12 +8,8 @@ import sqlparser.SelectCommand;
  */
 public class SelectExecutor implements QueryCommandExecutor {
 
-    private static final int DEFAULT_INITIAL_FETCH_SIZE = 20;
-    private static final int DEFAULT_NEXT_FETCH_SIZE = 10;
-
-
     public ResultSet executeQuery(SelectCommand selectSQLCommand, ExecutionContext context) {
-        QueryAssembly assembly = QueryAssemblyFactory.getInstance(selectSQLCommand);
+        QueryAssembly assembly = QueryAssemblyFactory.getInstance(selectSQLCommand, context);
         return assembly.getResultSet();
     }
 }

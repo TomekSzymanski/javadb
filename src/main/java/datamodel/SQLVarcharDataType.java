@@ -1,5 +1,7 @@
 package datamodel;
 
+import org.apache.commons.lang3.Validate;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,10 +32,8 @@ public class SQLVarcharDataType extends SQLDataType {
 
     @Override
     public int getFieldSizeSpecifier(int index) {
-        if (index==0) {
-            return lenght;
-        }
-        throw new IllegalArgumentException("There can be only one field length specifier for VARCHAR");
+        Validate.isTrue(index==0, "There can be only one field length specifier for VARCHAR");
+        return lenght;
     }
 
     @Override

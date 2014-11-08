@@ -1,7 +1,7 @@
 package buffermanager;
 
 /**
- * Implementation of http://en.wikipedia.org/wiki/Adaptive_replacement_cache
+ * Implementation of <a href="http://en.wikipedia.org/wiki/Adaptive_replacement_cache">Adaptive Replacement Cache</a> page replacement algorithm.
  */
 public class AdaptiveReplacementCache<K> implements PageReplacementPolicy<K> {
     @Override

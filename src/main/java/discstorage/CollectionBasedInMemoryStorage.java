@@ -60,4 +60,9 @@ public class CollectionBasedInMemoryStorage implements Storage {
     public Iterator<List<? extends DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException {
         return tablesRecords.get(tableName).iterator();
     }
+
+    @Override
+    public void deleteAll(Identifier tableName) {
+        tablesRecords.get(tableName).clear();
+    }
 }

@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.util.NoSuchElementException;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Created on 2014-10-04.

@@ -1,6 +1,7 @@
 package sqlparser;
 
 import datamodel.Identifier;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -69,9 +70,7 @@ public abstract class AbstractSQLParser {
 
     List<String> parseCommaSeparatedList(List<String> list) throws SQLParseException {
         List<String> elements = new ArrayList<>();
-        if (list.size() == 0) {
-            throw new IllegalArgumentException("Comma separated list is empty");
-        }
+        Validate.notEmpty(list, "Comma separated list is empty");
         // add first identifier
         elements.add(list.get(0));
         // continue for more elements, if there are more

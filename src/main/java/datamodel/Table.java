@@ -1,5 +1,7 @@
 package datamodel;
 
+import org.apache.commons.lang3.Validate;
+
 import java.util.*;
 
 /**
@@ -12,6 +14,11 @@ public class Table {
     private Map<Identifier, Column> columnMap = new LinkedHashMap<>();
 
     private List<Identifier> primaryKey = new ArrayList<>(); // list of columnMap making primary key
+
+    public String getTableComment() {
+        return tableComment;
+    }
+
     private String tableComment;
 
     public Table(Identifier tableName) {
@@ -25,12 +32,9 @@ public class Table {
 
     public Column getColumn(Identifier columnName) {
         Column info = columnMap.get(columnName);
-        if (info == null) {
-            throw new IllegalArgumentException("Invalid column name " + columnName + " for table " + tableName);
-        }
+        Validate.notNull(info, "Invalid column name %s for table %s", columnName, tableName);
         return info;
     }
-
 
     /**
      * Returns columnMap in the order there were specified when creating the table
@@ -54,11 +58,8 @@ public class Table {
 
     public void addColumn(Column column) {
         Identifier columnName = column.columnName;
-        if (columnMap.containsKey(columnName)) {
-            throw new IllegalArgumentException("Table " + tableName + " already contains column " + columnName);
-        }
+        Validate.isTrue(!columnMap.containsKey(columnName), "Table '%s' already contains column '%s'", tableName, columnName);
         columnMap.put(columnName, column);
-
     }
 
     @Override

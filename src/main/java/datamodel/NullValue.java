@@ -19,6 +19,11 @@ public class NullValue extends DataTypeValue {
     }
 
     @Override
+    public long longValue() {
+        return 0;
+    }
+
+    @Override
     public float floatValue() {
         return 0;
     }

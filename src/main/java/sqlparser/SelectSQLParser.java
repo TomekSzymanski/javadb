@@ -44,7 +44,7 @@ import java.util.List;
    <quoted_string> ::= ''' .+ '''
 
  */
-class SelectSQLParser extends AbstractSQLParser implements SQLStatementParser {
+class SelectSQLParser extends AbstractSQLParser {
 
     private SelectCommand ast;
 
