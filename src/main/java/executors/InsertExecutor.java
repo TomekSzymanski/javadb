@@ -11,6 +11,7 @@ import storageapi.DataStoreException;
 import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * Created on 2014-10-23.
  */
-class InsertExecutor implements CommandExecutor {
+class InsertExecutor implements CommandExecutor<InsertCommand> {
 
     private Storage storage;
     private SystemDictionary dictionary;
@@ -29,18 +30,18 @@ class InsertExecutor implements CommandExecutor {
     }
 
     @Override
-    public int execute(AbstractSQLCommand command)  {
-        InsertCommand insertCommand = (InsertCommand)command; // TODO should we catch possible ClassCastException and rethrow as SQLException? tather not as it would a programmer error to pass here command other than InsertComamnd
-        Identifier tableName = insertCommand.getTableName();
+    // TODO extract short methods
+    public void execute(InsertCommand command)  {
+        Identifier tableName = command.getTableName();
         Collection<Identifier> tableColumnNamesList = dictionary.getTableColumnNames(tableName);
-        List<Identifier> columnsSpecifiedInINSERT = insertCommand.getColumnList();
-        List<String> valuesSpecifiedInINSERT = insertCommand.getValues();
+        List<Identifier> columnsSpecifiedInINSERT = command.getColumnList();
+        List<String> valuesSpecifiedInINSERT = command.getValues();
 
         // 1. verify each column provided in INSERT column specification exists in the table to insert data
-        for (Identifier column : columnsSpecifiedInINSERT) {
-            if (!tableColumnNamesList.contains(column)) {
-                throw new SQLException("Table " + tableName + " does not contain column " + column);
-            }
+        ArrayList<Identifier> invalidColumns = new ArrayList<>(columnsSpecifiedInINSERT);
+        invalidColumns.removeAll(tableColumnNamesList);
+        if (!invalidColumns.isEmpty()) {
+            throw new SQLException("Table " + tableName + " does not contain columns " + invalidColumns);
         }
 
         List<DataTypeValue> valuesOfRecordToInsert = new LinkedList<>();
@@ -79,7 +80,6 @@ class InsertExecutor implements CommandExecutor {
         } catch (DataStoreException e) {
             throw new SQLException(e);
         }
-        return 1;
     }
 
 }

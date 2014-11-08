@@ -11,9 +11,8 @@ import java.util.List;
  */
 public class CreateTableCommand extends AbstractSQLCommand {
 
-    @Override
-    public Type getType() {
-        return Type.CreateTableCommand;
+    public CreateTableCommand() {
+        super(Type.CreateTableCommand);
     }
 
     private Table table;

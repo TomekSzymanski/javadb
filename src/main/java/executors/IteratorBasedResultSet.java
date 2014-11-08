@@ -22,7 +22,7 @@ public class IteratorBasedResultSet<E extends DataTypeValue> implements ResultSe
     /* default number of rows that will be fetched from storage by this ResultSet when next() is called, and all prefetched rows have been already iterated */
     private static final int DEFAULT_NEXT_FETCH_SIZE = 20;
 
-    public IteratorBasedResultSet(Iterator queryResultIterator,
+    public IteratorBasedResultSet(Iterator<List<E>> queryResultIterator,
                            List<String> columnLabels,
                            ExecutionContext context) {
         int nextFetchSize = (context!=null && (context.nextFetchSize != 0))?  context.nextFetchSize : DEFAULT_NEXT_FETCH_SIZE;

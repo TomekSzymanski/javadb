@@ -25,7 +25,7 @@ class QueryAssemblyFactory {
     private static List<Identifier> expandAsteriskIntoColumns(Identifier tableName, List<String> columnList) {
         List<Identifier> columnExpandedList = new ArrayList<>();
         if (isOnlyAsteriskSpecified(columnList)) {
-            for (Identifier identifier : dictionary.getTableColumnNames(tableName)) {
+            for (Identifier identifier : dictionary.getTableColumnNames(tableName)) { // do foreach on list
                 columnExpandedList.add(identifier);
             }
         } else {

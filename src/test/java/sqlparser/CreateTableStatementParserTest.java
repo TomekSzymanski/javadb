@@ -29,7 +29,7 @@ public class CreateTableStatementParserTest {
         assertEquals(100, columnList.get(0).dataType.getFieldSizeSpecifier(0));
     }
 
-    @Test (expected = SQLParseException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void varcharMissesSizeSpecification() throws SQLParseException {
         CreateTableStatementParser parser = new CreateTableStatementParser();
         TokenizerMock tokens = new TokenizerMock(new String[]{"CREATE", "TABLE", "person", "(", "personName", "varchar", ")"});
@@ -89,7 +89,7 @@ public class CreateTableStatementParserTest {
         assertEquals(SQLNumberDataType.class, columnList.get(1).dataType.getClass());
 
         assertEquals("salary", columnList.get(2).columnName.getValue());
-        assertEquals(SQLNumberDataType.class, columnList.get(2).dataType.getClass()); // TODO: it seems dirty to expose that datatypes are implemented as classes. Mask with getType (returns enum)?
+        assertEquals(SQLNumberDataType.class, columnList.get(2).dataType.getClass());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class CreateTableStatementParserTest {
                 "    age number,\n" +
                 "    active boolean not null\n" +
                 ")";
-        CreateTableCommand ast = (CreateTableCommand)parser.parse(CREATE_TABLE_SQL); //TODO: is there something wrong with inheritance model that we need to cast in unit tests?
+        CreateTableCommand ast = parser.parse(CREATE_TABLE_SQL); //TODO: is there something wrong with inheritance model that we need to cast in unit tests?
 
         assertEquals("TAB1", ast.getTableInfo().getTableName().getValue());
 

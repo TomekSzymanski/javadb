@@ -5,10 +5,10 @@ import datamodel.Identifier;
 /**
  * Created on 2014-10-27.
  */
-class DropTableSQLParser extends AbstractSQLParser  {
+class DropTableSQLParser extends AbstractSQLParser<DropTableCommand>  {
 
     @Override
-    AbstractSQLCommand parse(Tokenizer tokenizer) throws SQLParseException {
+    DropTableCommand parse(Tokenizer tokenizer) throws SQLParseException {
         DropTableCommand ast = new DropTableCommand();
         // expect DROP TABLE
         expect(tokenizer, DROP, "Drop table statements does not contain DROP keyword");

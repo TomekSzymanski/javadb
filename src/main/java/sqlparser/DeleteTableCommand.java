@@ -6,9 +6,9 @@ import datamodel.Identifier;
  * Created on 2014-10-27.
  */
 public class DeleteTableCommand extends AbstractSQLCommand {
-    @Override
-    public Type getType() {
-        return Type.DeleteCommand;
+
+    public DeleteTableCommand() {
+        super(Type.DeleteCommand);
     }
 
     private Identifier tableName;

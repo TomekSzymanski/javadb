@@ -15,11 +15,11 @@ public interface Storage {
 
     void dropTable(Identifier tableName) throws DataStoreException;
 
-    void insertRecord(Identifier tableName, List<? extends DataTypeValue> recordValues) throws DataStoreException;
+    void insertRecord(Identifier tableName, List<DataTypeValue> recordValues) throws DataStoreException;
 
-    List<List<? extends DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException;
+    List<List<DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException;
 
-    Iterator<List<? extends DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException;
+    Iterator<List<DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException;
 
     void deleteAll(Identifier tableName);
 }

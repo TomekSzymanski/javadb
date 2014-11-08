@@ -7,9 +7,8 @@ import datamodel.Identifier;
  */
 public class DropTableCommand extends AbstractSQLCommand {
 
-    @Override
-    public Type getType() {
-        return Type.DropTableCommand;
+    public DropTableCommand() {
+        super(Type.DropTableCommand);
     }
 
     private Identifier tableName;
