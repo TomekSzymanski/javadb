@@ -11,4 +11,8 @@ public class SQLParseException extends RuntimeException {
     public SQLParseException(Throwable e) {
      super(e);
     }
+
+    public SQLParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -14,8 +14,9 @@ import java.util.List;
 
  <value_expression_list> ::= <left paren> <value_expr> [ {<comma> <value_expr>} ] <right paren>
  */
-class InsertSQLParser extends AbstractSQLParser  {
+class InsertSQLParser extends AbstractSQLParser<InsertCommand>  {
 
+    // remove global declaration
     private InsertCommand ast;
 
     /*

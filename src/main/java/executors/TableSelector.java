@@ -9,6 +9,7 @@ import storageapi.Storage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created on 2014-11-02.
@@ -16,16 +17,14 @@ import java.util.List;
 class TableSelector implements QueryAssembly {
 
     private static Storage storage = CollectionBasedInMemoryStorage.getInstance();
-    private Iterator<List<? extends DataTypeValue>> tableIterator;
+    private Iterator<List<DataTypeValue>> tableIterator;
     private List<String> columnLabels = new ArrayList<>();
 
     private ExecutionContext context;
 
     TableSelector(Identifier tableName, List<Identifier> columnList, ExecutionContext context) {
         tableIterator = storage.tableIterator(tableName);
-        for (Identifier column : columnList) {
-            columnLabels.add(column.getValue());
-        }
+        columnLabels = columnList.stream().map(v -> v.getValue()).collect(Collectors.toList());
         this.context = context;
     }
 

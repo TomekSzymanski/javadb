@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class CollectionBasedInMemoryStorage implements Storage {
 
-    private final Map<Identifier, List<List<? extends DataTypeValue>>> tablesRecords = new HashMap<>();
+    private final Map<Identifier, List<List<DataTypeValue>>> tablesRecords = new HashMap<>();
 
     private static CollectionBasedInMemoryStorage INSTANCE;
 
@@ -40,7 +40,7 @@ public class CollectionBasedInMemoryStorage implements Storage {
     }
 
     @Override
-    public void insertRecord(Identifier tableName, List<? extends DataTypeValue> recordValues) throws DataStoreException {
+    public void insertRecord(Identifier tableName, List<DataTypeValue> recordValues) throws DataStoreException {
         if (!tablesRecords.containsKey(tableName)) {
             throw new DataStoreException("Table " + tableName + " does not exist");
         }
@@ -48,8 +48,8 @@ public class CollectionBasedInMemoryStorage implements Storage {
     }
 
     @Override
-    public List<List<? extends DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException {
-        List<List<? extends DataTypeValue>> records = new ArrayList<>();
+    public List<List<DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException {
+        List<List<DataTypeValue>> records = new ArrayList<>();
         if (tablesRecords.containsKey(tableName)) {
             records = tablesRecords.get(tableName);
         }
@@ -57,7 +57,7 @@ public class CollectionBasedInMemoryStorage implements Storage {
     }
 
     @Override
-    public Iterator<List<? extends DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException {
+    public Iterator<List<DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException {
         return tablesRecords.get(tableName).iterator();
     }
 

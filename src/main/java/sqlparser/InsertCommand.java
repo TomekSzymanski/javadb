@@ -11,9 +11,8 @@ import java.util.List;
  */
 public class InsertCommand extends AbstractSQLCommand {
 
-    @Override
-    public Type getType() {
-        return Type.InsertCommand;
+    public InsertCommand() {
+        super(Type.InsertCommand);
     }
 
     private Identifier tableName;

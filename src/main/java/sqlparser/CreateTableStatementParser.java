@@ -32,7 +32,7 @@ import java.util.List;
     <comma> ::= ,
 
  */
-class CreateTableStatementParser extends AbstractSQLParser {
+class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
 
     private CreateTableCommand ast;
 
@@ -86,12 +86,7 @@ class CreateTableStatementParser extends AbstractSQLParser {
                 fieldSizeSpecifiers = parseFieldSizeSpecification(tokenizer);
             }
 
-            SQLDataType columnDataType;
-            try {
-                columnDataType = SQLDataTypeFactory.getInstance(dataTypeString, fieldSizeSpecifiers);
-            } catch (IllegalArgumentException e) {
-                throw new SQLParseException(e);
-            }
+            SQLDataType columnDataType = SQLDataTypeFactory.getInstance(dataTypeString, fieldSizeSpecifiers);
 
             boolean isNotNull = false;
             // now we can meet only constraints specification
@@ -126,13 +121,14 @@ class CreateTableStatementParser extends AbstractSQLParser {
         try {
             fieldSizeSpecsStrings = parseCommaSeparatedList(createListFromAllTokensBefore(tokenizer, RIGHT_PAREN));
         } catch (IllegalArgumentException e) {
-            throw new SQLParseException("Unable to parse field size specifier list");
+            // be careful with rethrowing IllegalArgumentException
+            throw new SQLParseException("Unable to parse field size specifier list",e);
         }
         for (String fieldSizeSpecString : fieldSizeSpecsStrings) {
             try {
                 fieldSizeSpecs.add(Integer.parseInt(fieldSizeSpecString));
             } catch (NumberFormatException e) {
-                throw new SQLParseException("Unable to parse field size specification");
+                throw new SQLParseException("Unable to parse field size specification", e);
             }
         }
 

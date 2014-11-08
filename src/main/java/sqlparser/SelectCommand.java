@@ -10,10 +10,10 @@ import java.util.List;
  */
 public class SelectCommand extends AbstractSQLCommand {
 
-    @Override
-    public Type getType() {
-        return Type.SelectCommand;
+    public SelectCommand() {
+        super(Type.SelectCommand);
     }
+
     private final List<String> selectList = new ArrayList<>(); // it cannot be Identifier list, as in the column specification we may have columns (Identifiers), but also strings or asterisk
     private final List<Identifier> tableList = new ArrayList<>();
 

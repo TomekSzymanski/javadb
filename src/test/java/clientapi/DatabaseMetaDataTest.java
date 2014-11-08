@@ -5,6 +5,8 @@ import org.junit.Test;
 
 /**
  * Created on 2014-11-08.
+ *
+ * Annotation @VisibleForTesting - mark package methods use by tests only
  */
 public class DatabaseMetaDataTest {
 

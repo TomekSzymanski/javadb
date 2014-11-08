@@ -2,7 +2,7 @@ package clientapi;
 
 import executors.*;
 import sqlparser.SQLParseException;
-import sqlparser.SQLParser;
+import sqlparser.SQLParserImpl;
 import sqlparser.SelectCommand;
 import sqlparser.AbstractSQLCommand;
 
@@ -33,7 +33,7 @@ public class Statement {
             try {
                 SelectCommand selectCommand = (SelectCommand) parse(sql);
                 return queryExecutor.executeQuery(selectCommand, context);
-            } catch (ClassCastException e) {
+            } catch (ClassCastException e) { //TODO: handle it differently
                 throw new SQLException("Cannot call executeQuery method with non SELECT statement");
             }
         } catch (SQLParseException e) {
@@ -46,22 +46,22 @@ public class Statement {
      * @param sql
      * @return number of rows changed.
      */
-    public int executeUpdate(String sql) throws SQLException {
+    public void executeUpdate(String sql) throws SQLException {
         try {
             AbstractSQLCommand SQLCommand = parse(sql);
             CommandExecutor executor = CommandExecutorFactory.getInstance(SQLCommand.getType());
-            return executor.execute(SQLCommand);
+            executor.execute(SQLCommand);
         } catch (SQLParseException e) {
             throw new SQLException(e);
         }
     }
 
-    public int execute(String sql) throws SQLException {
-        return executeUpdate(sql);
+    public void execute(String sql) throws SQLException {
+         executeUpdate(sql);
     }
 
     private AbstractSQLCommand parse(String sql) {
-        SQLParser parser = new SQLParser();
+        SQLParserImpl parser = new SQLParserImpl();
         return parser.parse(sql);
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created on 2014-10-22.
  */
-public abstract class AbstractSQLParser {
+public abstract class AbstractSQLParser<T extends  AbstractSQLCommand> implements SQLParser<T> {
 
     static final String COMMA = ",";
     static final String LEFT_PAREN = "(";
@@ -102,9 +102,10 @@ public abstract class AbstractSQLParser {
         return new SimpleTokenizer(sql);
     }
 
-    public AbstractSQLCommand parse(String sql) throws SQLParseException {
+    @Override
+    public final T parse(String sql) throws SQLParseException {
         return parse(getTokenizer(sql));
     }
 
-    abstract AbstractSQLCommand parse(Tokenizer tokenizer) throws SQLParseException;
+    abstract T parse(Tokenizer tokenizer) throws SQLParseException;
 }

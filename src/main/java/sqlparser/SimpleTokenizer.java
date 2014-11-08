@@ -35,12 +35,13 @@ public class SimpleTokenizer implements Iterator<String>,Tokenizer {
             }
 
             if (withinQuotedString && (nextChar == SINGLE_QUOTE || nextChar == ESCAPE_CHAR)) {
-                if (pos + 1 < input.length()) {// more characters in the input
-                    if (input.charAt(pos + 1) == SINGLE_QUOTE) {
-                        nextToken.append(input.charAt(pos + 1));
-                        pos++; // WARN
-                        continue;
-                    }
+                if (pos + 1 >= input.length()) {// more characters in the input
+                    continue;
+                }
+                if (input.charAt(pos + 1) == SINGLE_QUOTE) {
+                    nextToken.append(input.charAt(pos + 1));
+                    pos++; // WARN
+                    continue;
                 }
             }
 

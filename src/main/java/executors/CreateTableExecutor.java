@@ -11,7 +11,7 @@ import systemdictionary.SystemDictionary;
 /**
  * Created on 2014-10-28.
  */
-public class CreateTableExecutor implements CommandExecutor {
+public class CreateTableExecutor implements CommandExecutor<CreateTableCommand> {
 
     private Storage storage;
     private SystemDictionary dictionary;
@@ -22,14 +22,8 @@ public class CreateTableExecutor implements CommandExecutor {
     }
 
     @Override
-    public int execute(AbstractSQLCommand command) {
-        CreateTableCommand createTableCommand = (CreateTableCommand)command; // TODO should we catch possible ClassCastException and rethrow as SQLException? Rather not as it would a programmer error to pass here command other than InsertComamnd
-        try {
-            dictionary.registerTable(createTableCommand.getTableInfo());
-            storage.createTable(createTableCommand.getTableInfo().getTableName());
-        } catch (DataDictionaryException | DataStoreException e) {
-            throw new SQLException(e);
-        }
-        return 0;
+    public void execute(CreateTableCommand command) {
+        dictionary.registerTable(command.getTableInfo());
+        storage.createTable(command.getTableInfo().getTableName());
     }
 }
