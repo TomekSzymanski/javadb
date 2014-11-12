@@ -1,5 +1,7 @@
 package clientapi;
 
+import systemdictionary.SystemDictionary;
+
 /**
  A connection (session) with a specific database. SQL statements are executed and results are returned within the context of a connection.
  */
@@ -19,9 +21,9 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      */
     public DatabaseMetaData getMetaData() {
-//        return SystemDictionary.getInstance().getDatabaseMetaData();
-        return new DatabaseMetaData();
+        return SystemDictionary.getInstance().getDatabaseMetaData();
     }
+
 
     /**
      * Releases this Connection object's database and JDBC resources immediately instead of waiting for them to be automatically released.
@@ -29,6 +31,5 @@ public class Connection implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-
     }
 }

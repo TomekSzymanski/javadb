@@ -31,4 +31,9 @@ public class SQLBooleanDataType extends SQLDataType {
         }
         throw new IllegalArgumentException("Cannot assign " + stringValue + " for BOOLEAN field");
     }
+
+    @Override
+    public String getTypeName() {
+        return SQLDataType.BOOLEAN;
+    }
 }

@@ -1,6 +1,5 @@
 package datamodel;
 
-import clientapi.SQLException;
 import org.apache.commons.lang3.Validate;
 
 import java.util.List;
@@ -31,7 +30,7 @@ public class SQLDataTypeFactory {
                 Validate.isTrue(numberOfFieldSizeSpecifiers==1, "exactly one field size specifier must be specified for VARCHAR");
                 return SQLVarcharDataType.getInstance(fieldSizeSpecifiers.get(0));
             default:
-                throw new SQLException("Unrecognized column data type " + dataTypeString);
+                throw new IllegalArgumentException("Unrecognized column data type " + dataTypeString);
         }
     }
 }

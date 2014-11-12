@@ -21,4 +21,6 @@ public abstract class SQLDataType {
         }
     }
 
+    public abstract String getTypeName();
+
 }

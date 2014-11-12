@@ -13,6 +13,10 @@ public class BooleanValue extends DataTypeValue {
     public static final BooleanValue TRUE = new BooleanValue(true);
     public static final BooleanValue FALSE = new BooleanValue(false);
 
+    public static final BooleanValue valueOf(boolean arg) {
+        return arg? TRUE : FALSE;
+    }
+
     @Override
     public boolean booleanValue() {
         return value;

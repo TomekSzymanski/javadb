@@ -5,9 +5,7 @@ import datamodel.DataTypeValue;
 import datamodel.Identifier;
 import datamodel.NullValue;
 import datamodel.SQLDataType;
-import sqlparser.AbstractSQLCommand;
 import sqlparser.InsertCommand;
-import storageapi.DataStoreException;
 import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
@@ -33,6 +31,9 @@ class InsertExecutor implements CommandExecutor<InsertCommand> {
     // TODO extract short methods
     public void execute(InsertCommand command)  {
         Identifier tableName = command.getTableName();
+        if (!dictionary.tableExists(tableName)) {
+            throw new SQLException("Trying to insert to non existent table " + tableName);
+        }
         Collection<Identifier> tableColumnNamesList = dictionary.getTableColumnNames(tableName);
         List<Identifier> columnsSpecifiedInINSERT = command.getColumnList();
         List<String> valuesSpecifiedInINSERT = command.getValues();
@@ -74,12 +75,8 @@ class InsertExecutor implements CommandExecutor<InsertCommand> {
                 valuesOfRecordToInsert.add(value);
             }
         }
+        storage.insertRecord(tableName, valuesOfRecordToInsert);
 
-        try {
-            storage.insertRecord(tableName, valuesOfRecordToInsert);
-        } catch (DataStoreException e) {
-            throw new SQLException(e);
-        }
     }
 
 }

@@ -25,6 +25,10 @@ public class Table {
         this.tableName = tableName;
     }
 
+    public Table(String tableNameString) {
+        this(new Identifier(tableNameString));
+    }
+
     public Column getColumn(int index) {
         return (Column)columnMap.values().toArray()[index];
     }

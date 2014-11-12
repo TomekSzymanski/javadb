@@ -30,12 +30,19 @@ public class IteratorBasedResultSet<E extends DataTypeValue> implements ResultSe
         this.columnLabels = columnLabels;
     }
 
-    /**
-     * Moves the cursor froward one row from its current position. A ResultSet cursor is initially positioned before the first row; the first call to the method next makes the first row the current row; the second call makes the second row the current row, and so on.
-     * When a call to the next method returns false, the cursor is positioned after the last row.
-     *
-     * @return true if the new current row is valid; false if there are no more rows
-     */
+    public IteratorBasedResultSet(Iterator<List<E>> queryResultIterator, // TODO public only for metadata collection - move metadata collection logic from clientapi
+                           List<String> columnLabels) {
+        this(queryResultIterator, columnLabels, null);
+    }
+
+
+
+        /**
+         * Moves the cursor froward one row from its current position. A ResultSet cursor is initially positioned before the first row; the first call to the method next makes the first row the current row; the second call makes the second row the current row, and so on.
+         * When a call to the next method returns false, the cursor is positioned after the last row.
+         *
+         * @return true if the new current row is valid; false if there are no more rows
+         */
     @Override
     public boolean next() throws SQLException {
         if (queryResultIterator.hasNext()) {

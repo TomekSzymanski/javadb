@@ -10,6 +10,10 @@ public class IntegerValue extends DataTypeValue {
         value = Integer.valueOf(stringValue);
     }
 
+    public IntegerValue(int intValue) {
+        this.value = intValue;
+    }
+
     @Override
     public boolean booleanValue() {
         return false;

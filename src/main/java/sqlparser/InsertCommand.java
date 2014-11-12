@@ -36,26 +36,18 @@ public class InsertCommand extends AbstractSQLCommand {
         return values;
     }
 
-    void addColumn(Identifier columnName) {
-        columnList.add(columnName);
-    }
-
     void setColumnList(List<Identifier> columnList) {
         this.columnList = columnList;
-    }
-
-    void setValuesList(List<String> values) {
-        Validate.isTrue((columnList.isEmpty()) || (values.size() <= columnList.size()), "If column list is specified then you cannot add more values than columns");
-        this.values = values;
     }
 
     /**
      * Either columnList is empty and we add any values
      * OR we have already added columns to columnList and we check if number of values being added does not exceed number of columns on column list
-     * @param value
+     * @param values
      */
-    void addValue(String value) {
+    void setValuesList(List<String> values) {
         Validate.isTrue((columnList.isEmpty()) || (values.size() <= columnList.size()), "If column list is specified then you cannot add more values than columns");
-        values.add(value);
+        this.values = values;
     }
+
 }

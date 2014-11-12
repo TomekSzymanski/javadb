@@ -1,10 +1,12 @@
 package clientapi;
 
-import executors.*;
-import sqlparser.SQLParseException;
+import executors.CommandExecutor;
+import executors.CommandExecutorFactory;
+import executors.ExecutionContext;
+import executors.QueryCommandExecutor;
+import sqlparser.AbstractSQLCommand;
 import sqlparser.SQLParserImpl;
 import sqlparser.SelectCommand;
-import sqlparser.AbstractSQLCommand;
 
 /**
  * Created on 2014-10-23.
@@ -30,14 +32,10 @@ public class Statement {
      */
     public ResultSet executeQuery(String sql) throws SQLException {
         try {
-            try {
-                SelectCommand selectCommand = (SelectCommand) parse(sql);
-                return queryExecutor.executeQuery(selectCommand, context);
-            } catch (ClassCastException e) { //TODO: handle it differently
-                throw new SQLException("Cannot call executeQuery method with non SELECT statement");
-            }
-        } catch (SQLParseException e) {
-            throw new SQLException(e);
+            SelectCommand selectCommand = (SelectCommand) parse(sql);
+            return queryExecutor.executeQuery(selectCommand, context);
+        } catch (ClassCastException e) { //TODO: handle it differently
+            throw new SQLException("Cannot call executeQuery method with non SELECT statement");
         }
     }
 
@@ -47,13 +45,9 @@ public class Statement {
      * @return number of rows changed.
      */
     public void executeUpdate(String sql) throws SQLException {
-        try {
-            AbstractSQLCommand SQLCommand = parse(sql);
-            CommandExecutor executor = CommandExecutorFactory.getInstance(SQLCommand.getType());
-            executor.execute(SQLCommand);
-        } catch (SQLParseException e) {
-            throw new SQLException(e);
-        }
+        AbstractSQLCommand SQLCommand = parse(sql);
+        CommandExecutor executor = CommandExecutorFactory.getInstance(SQLCommand.getType());
+        executor.execute(SQLCommand);
     }
 
     public void execute(String sql) throws SQLException {

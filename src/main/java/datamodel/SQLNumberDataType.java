@@ -94,4 +94,10 @@ public class SQLNumberDataType extends SQLDataType {
         return new FloatValue(stringValue);
     }
 
+    @Override
+    public String getTypeName() {
+        return SQLDataType.NUMBER;
+    }
+
+
 }

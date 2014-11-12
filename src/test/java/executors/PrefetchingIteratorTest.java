@@ -18,8 +18,8 @@ public class PrefetchingIteratorTest {
 
 
     @Test
-    public void testInitialFetchDoneOnFirstCallToNext() {
-        Iterator mock = Mockito.mock(Iterator.class);
+    public <T> void testInitialFetchDoneOnFirstCallToNext() {
+        Iterator<T> mock = (Iterator<T>)Mockito.mock(Iterator.class);
         Iterator prefetchingIterator = new PrefetchingIterator<>(mock, initialFetchSize, nextFetchSize);
         Mockito.when(mock.hasNext()).thenReturn(true);
         // when next() called at least once
@@ -29,9 +29,9 @@ public class PrefetchingIteratorTest {
     }
 
     @Test
-    public void afterInitilaPrefetchNoCallsToNextWithinBufferSize() {
-        Iterator mock = Mockito.mock(Iterator.class);
-        Iterator prefetchingIterator = new PrefetchingIterator<Integer>(mock, initialFetchSize, nextFetchSize);
+    public void afterInitialPrefetchNoCallsToNextWithinBufferSize() {
+        Iterator<Integer> mock = (Iterator<Integer>)Mockito.mock(Iterator.class);
+        Iterator prefetchingIterator = new PrefetchingIterator<>(mock, initialFetchSize, nextFetchSize);
         // given
         Mockito.when(mock.hasNext()).thenReturn(true);
         prefetchingIterator.next(); // load buffer
@@ -58,7 +58,7 @@ public class PrefetchingIteratorTest {
 
     @Test
     public void testActualContentForwarderCorrectly() {
-        Iterator mock = Mockito.mock(Iterator.class);
+        Iterator<Integer> mock = (Iterator<Integer>)Mockito.mock(Iterator.class);
         Iterator prefetchingIterator = new PrefetchingIterator<Integer>(mock, initialFetchSize, nextFetchSize);
         Mockito.when(mock.hasNext()).thenReturn(true);
         Mockito.when(mock.next()).thenReturn(new Integer(1)).thenReturn(new Integer(2));

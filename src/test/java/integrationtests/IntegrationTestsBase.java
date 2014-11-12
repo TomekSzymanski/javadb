@@ -9,18 +9,18 @@ import clientapi.Statement;
  */
 public class IntegrationTestsBase {
 
-    boolean tableExists(Connection c, String tableName) {
+    public static boolean tableExists(Connection c, String tableName) {
         ResultSet rs = c.getMetaData().getTables(tableName);
         return (rs.next());
     }
 
-    void createTestTable(Connection c, String tableName, String createTableSQL) {
+    public static void createTestTable(Connection c, String tableName, String createTableSQL) {
         Statement stmt = c.createStatement();
         dropTestTable(c, tableName); // clear any old leftover, table will be recreated
         stmt.execute(createTableSQL);
     }
 
-    void dropTestTable(Connection c, String tableName) {
+    public static void dropTestTable(Connection c, String tableName) {
         Statement stmt = c.createStatement();
         if (tableExists(c, tableName)) {
             stmt.execute("DROP TABLE " + tableName);

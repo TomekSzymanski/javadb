@@ -39,10 +39,14 @@ public class InsertTest extends IntegrationTestsBase {
             assertEquals(0, rs.getInt("b"));
             assertEquals(false, rs.getBoolean("b"));
         }catch (clientapi.SQLException e) {
+            dropTestTable(c, TEST_TABLE_NAME);
             fail(e.getMessage());
-        } finally {
-           // tear down
-           dropTestTable(c, TEST_TABLE_NAME);
         }
+    }
+
+    @Test (expected = clientapi.SQLException.class)
+    public void tryToInsertIntoNonExistentTable() {
+        final String TEST_TABLE_NAME = "NON_EXISTENT_TABLE34534";
+        stmt.execute("INSERT INTO " + TEST_TABLE_NAME + " (a) VALUES (1)");
     }
 }

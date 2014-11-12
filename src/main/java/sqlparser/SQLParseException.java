@@ -1,9 +1,11 @@
 package sqlparser;
 
+import clientapi.SQLException;
+
 /**
  * Created on 2014-10-04.
  */
-public class SQLParseException extends RuntimeException {
+public class SQLParseException extends SQLException {
     public SQLParseException(String s) {
         super(s);
     }
