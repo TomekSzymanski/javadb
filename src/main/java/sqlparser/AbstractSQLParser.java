@@ -4,8 +4,10 @@ import datamodel.Identifier;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created on 2014-10-22.
@@ -34,16 +36,10 @@ public abstract class AbstractSQLParser<T extends  AbstractSQLCommand> implement
             "NUMBER", "VARCHAR", "BOOLEAN", ASTERISK};
 
     public static boolean isReservedKeyword(String value) {
-        for (String keyword : RESERVED_KEYWORDS) {
-            if (value.equals(keyword)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(RESERVED_KEYWORDS).anyMatch(keyword -> keyword.equals(value));
     }
 
     List<Identifier> parseIdentifierList(List<String> list) throws SQLParseException {
-
         List<String> elements;
         try {
             elements = parseCommaSeparatedList(list);
@@ -51,13 +47,7 @@ public abstract class AbstractSQLParser<T extends  AbstractSQLCommand> implement
             throw new SQLParseException("No identifiers specified OR Missing comma in identifiers list");
              // TODO how to differentiate exceptions
         }
-
-        List<Identifier> identifiers = new ArrayList<>();
-        for (String element : elements) {
-            identifiers.add(new Identifier(element));
-        }
-
-        return identifiers;
+        return elements.stream().map(Identifier::new).collect(Collectors.toList());
     }
 
     List<String> createListFromAllTokensBefore(Tokenizer tokenizer, String endToken) {

@@ -4,6 +4,7 @@ import datamodel.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Parses CREATE TABLE SQL statements, according to subset of SQL 99 specification.
@@ -124,12 +125,11 @@ class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
             // be careful with rethrowing IllegalArgumentException
             throw new SQLParseException("Unable to parse field size specifier list",e);
         }
-        for (String fieldSizeSpecString : fieldSizeSpecsStrings) {
-            try {
-                fieldSizeSpecs.add(Integer.parseInt(fieldSizeSpecString));
-            } catch (NumberFormatException e) {
-                throw new SQLParseException("Unable to parse field size specification", e);
-            }
+
+        try {
+            fieldSizeSpecs = fieldSizeSpecsStrings.stream().map(Integer::parseInt).collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            throw new SQLParseException("Unable to parse field size specification", e);
         }
 
         expect(tokenizer, RIGHT_PAREN, "field size specification not ended with right paren");

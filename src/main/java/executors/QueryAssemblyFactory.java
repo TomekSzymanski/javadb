@@ -5,8 +5,8 @@ import sqlparser.AbstractSQLParser;
 import sqlparser.SelectCommand;
 import systemdictionary.SystemDictionary;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created on 2014-11-02.
@@ -23,15 +23,11 @@ class QueryAssemblyFactory {
     }
 
     private static List<Identifier> expandAsteriskIntoColumns(Identifier tableName, List<String> columnList) {
-        List<Identifier> columnExpandedList = new ArrayList<>();
+        List<Identifier> columnExpandedList;
         if (isOnlyAsteriskSpecified(columnList)) {
-            for (Identifier identifier : dictionary.getTableColumnNames(tableName)) { // do foreach on list
-                columnExpandedList.add(identifier);
-            }
+            columnExpandedList = dictionary.getTableColumnNames(tableName).stream().collect(Collectors.toList());
         } else {
-            for (String column : columnList) {
-                columnExpandedList.add(new Identifier(column));
-            }
+            columnExpandedList = columnList.stream().map(Identifier::new).collect(Collectors.toList());
         }
         return columnExpandedList;
     }

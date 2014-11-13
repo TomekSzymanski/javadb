@@ -24,7 +24,7 @@ class TableSelector implements QueryAssembly {
 
     TableSelector(Identifier tableName, List<Identifier> columnList, ExecutionContext context) {
         tableIterator = storage.tableIterator(tableName);
-        columnLabels = columnList.stream().map(v -> v.getValue()).collect(Collectors.toList());
+        columnLabels = columnList.stream().map(Identifier::getValue).collect(Collectors.toList());
         this.context = context;
     }
 

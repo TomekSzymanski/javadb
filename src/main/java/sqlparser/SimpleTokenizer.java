@@ -1,9 +1,6 @@
 package sqlparser;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Created on 2014-10-03.
