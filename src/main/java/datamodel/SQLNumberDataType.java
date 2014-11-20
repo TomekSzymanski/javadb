@@ -1,5 +1,8 @@
 package datamodel;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +15,7 @@ public class SQLNumberDataType extends SQLDataType {
         this.precisionSpecification = new PrecisionSpecification(precision, scale);
     }
 
-    private static class PrecisionSpecification {
+    private static class PrecisionSpecification implements Serializable {
 
         private static final int NOT_SPECIFIED = -1; // we cannot rely on default int value of 0 to mean unspecified value because 0 is allowed for scale
 
@@ -97,6 +100,12 @@ public class SQLNumberDataType extends SQLDataType {
     @Override
     public String getTypeName() {
         return SQLDataType.NUMBER;
+    }
+
+    @Override
+    public DataTypeValue readValue(ObjectInputStream is, int numberOfBytesToRead) throws IOException {
+        int valueRead = is.readInt(); // TODO hardcoded as if NUMBER can be represented only by INTEGERVALUE, not true
+        return new IntegerValue(valueRead);
     }
 
 

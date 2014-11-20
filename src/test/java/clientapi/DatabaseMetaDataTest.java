@@ -1,6 +1,7 @@
 package clientapi;
 
 import org.junit.Test;
+import systemdictionary.SystemDictionary;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +11,8 @@ import static org.junit.Assert.*;
  * Annotation @VisibleForTesting - mark package methods use by tests only
  */
 public class DatabaseMetaDataTest {
+
+    private static final SystemDictionary systemDictionary = SystemDictionary.createEmptyDictionary();
 
     @Test
     public void getTablesByPattern() {

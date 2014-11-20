@@ -3,10 +3,12 @@ package datamodel;
 import org.apache.commons.lang3.Validate;
 import sqlparser.AbstractSQLParser;
 
+import java.io.Serializable;
+
 /**
  * Created on 2014-10-04.
  */
-public class Identifier {
+public class Identifier implements Serializable { //TODO: replace its serialization with int
 
     public final static int MAX_IDENTIFIER_LENGTH = 60;
 

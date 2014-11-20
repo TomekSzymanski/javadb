@@ -2,8 +2,10 @@ package discstorage;
 
 import datamodel.DataTypeValue;
 import datamodel.Identifier;
+import org.apache.commons.lang3.Validate;
 import storageapi.DataStoreException;
 import storageapi.Storage;
+import systemdictionary.SystemDictionary;
 
 import java.util.*;
 
@@ -36,6 +38,7 @@ public class CollectionBasedInMemoryStorage implements Storage {
 
     @Override
     public void dropTable(Identifier tableName) throws DataStoreException {
+        Validate.isTrue(tablesRecords.containsKey(tableName), "Trying to remove non existing table %s", tableName.getValue());
         tablesRecords.remove(tableName);
     }
 
@@ -47,7 +50,7 @@ public class CollectionBasedInMemoryStorage implements Storage {
         tablesRecords.get(tableName).add(recordValues);
     }
 
-    @Override
+    //@Override
     public List<List<DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException {
         List<List<DataTypeValue>> records = new ArrayList<>();
         if (tablesRecords.containsKey(tableName)) {
@@ -64,5 +67,10 @@ public class CollectionBasedInMemoryStorage implements Storage {
     @Override
     public void deleteAll(Identifier tableName) {
         tablesRecords.get(tableName).clear();
+    }
+
+    @Override
+    public SystemDictionary getSystemDictionary() {
+        return null; // TODO: implement returning instance of NON persistent dictionary
     }
 }

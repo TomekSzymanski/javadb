@@ -3,6 +3,8 @@ package datamodel;
 import clientapi.SQLException;
 import org.apache.commons.lang3.Validate;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,5 +56,14 @@ public class SQLVarcharDataType extends SQLDataType {
     @Override
     public String getTypeName() {
         return SQLDataType.VARCHAR;
+    }
+
+    @Override
+    public DataTypeValue readValue(ObjectInputStream is, int numberOfBytesToRead) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < numberOfBytesToRead / 2; i++) {
+            builder.append(is.readChar()); // readChar reads two bytes per call
+        }
+        return new VarcharValue(builder.toString());
     }
 }

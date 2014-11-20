@@ -1,5 +1,8 @@
 package datamodel;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 /**
  * Created on 2014-11-01.
  */
@@ -34,4 +37,37 @@ public class FloatValue extends DataTypeValue {
     public String toString() {
         return String.valueOf(value);
     }
+
+    @Override
+    public int length() {
+        return 4;
+    }
+
+    @Override
+    public DataTypeValue valueOf(String s) {
+        return new FloatValue(s);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FloatValue that = (FloatValue) o;
+
+        if (Float.compare(that.value, value) != 0) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (value != +0.0f ? Float.floatToIntBits(value) : 0);
+    }
+
+    @Override
+    public void writeToStream(ObjectOutputStream os) throws IOException {
+        os.writeFloat(value);
+    }
+
 }

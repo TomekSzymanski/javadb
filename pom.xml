@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>javadb</groupId>
+  <groupId>tomeksz</groupId>
   <artifactId>javadb</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -29,13 +29,18 @@
     </dependency>
 
       <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-core</artifactId>
-          <version>1.9.5</version>
+          <groupId>commons-io</groupId> <!-- TODO: how come that it is recognized?-->
+          <artifactId>commons-io</artifactId>
+          <version>2.4</version>
       </dependency>
 
 
-
+      <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+          <version>1.9.5</version>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
 
   <build>
@@ -55,14 +60,35 @@
               <artifactId>maven-surefire-plugin</artifactId>
               <version>2.17</version>
               <configuration>
+                  <!--parallel>classes</parallel>
+                  <threadCount>1</threadCount-->
                   <excludes>
                       <exclude>**/jdbcandoracletests/*</exclude>
                   </excludes>
               </configuration>
           </plugin>
 
+          <plugin> <!-- needed for jar to contain all dependencies as well -->
+              <artifactId>maven-assembly-plugin</artifactId>
+              <configuration>
+                  <descriptorRefs>
+                      <descriptorRef>jar-with-dependencies</descriptorRef>
+                  </descriptorRefs>
+              </configuration>
+              <executions> <!-- bind building jar with dependencies to the package phase -->
+                  <execution>
+                      <id>assembly-id</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>single</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
+
       </plugins>
   </build>
+
     <reporting>
         <plugins>
             <plugin>

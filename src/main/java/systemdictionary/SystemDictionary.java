@@ -1,10 +1,18 @@
 package systemdictionary;
 
+import clientapi.DatabaseMetaData;
 import clientapi.ResultSet;
 import datamodel.*;
 import executors.IteratorBasedResultSet;
+import storageapi.DataStoreException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 /**
@@ -14,9 +22,39 @@ public class SystemDictionary {
 
     private static SystemDictionary INSTANCE;
 
-    public static SystemDictionary getInstance() {
+    public synchronized static SystemDictionary getInstance() {
         if (INSTANCE==null) {
-            INSTANCE = new SystemDictionary(); // TODO: load dictionary from disk
+            throw new IllegalStateException("trying to get reference to not initialized dictionary");
+        }
+        return INSTANCE;
+    }
+
+    public synchronized static SystemDictionary createEmptyDictionary() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Trying to initialize already initialized system dictionary");
+        }
+        INSTANCE = new SystemDictionary();
+        return INSTANCE;
+    }
+
+    /**
+     * Loads system dictionary from storage
+     */
+    public synchronized static SystemDictionary loadSystemDictionary(File systemDictionaryFile) {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Trying to initialize already initialized system dictionary");
+        }
+
+        if (systemDictionaryFile.length() == 0) { // new database created, have to initialize itself as empty registry
+            INSTANCE = new SystemDictionary();
+        } else { // system dictionary file not empty -> boot itself from that file
+            try { // TODO: too many try? (first is try-with-resources)
+                try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(systemDictionaryFile))) {
+                    INSTANCE = (SystemDictionary) input.readObject();
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                throw new DataStoreException(e);
+            }
         }
         return INSTANCE;
     }
@@ -25,61 +63,85 @@ public class SystemDictionary {
 
     private Map<Identifier, Table> registeredTables = new HashMap<>();
 
+    private ReadWriteLock tablesLock = new ReentrantReadWriteLock();
+
     public void registerTable(Table table) throws DataDictionaryException {
+        tablesLock.writeLock().lock();
         if (registeredTables.containsKey(table.getTableName())) {
-            throw new DataDictionaryException("Table " + table.getTableName() + " already exists");
-        } else {
-            registeredTables.put(table.getTableName(), table);
+            tablesLock.writeLock().unlock();
+            throw new DataDictionaryException("Table " + table.getTableName() + " already exists"); //TODO add persisting dictionary state to the file
         }
+        registeredTables.put(table.getTableName(), table);
+        tablesLock.writeLock().unlock();
+    }
+
+    public void deregisterTable(Identifier tableName) throws DataDictionaryException {
+        tablesLock.writeLock().lock();
+        if (!registeredTables.containsKey(tableName)) {
+            tablesLock.writeLock().unlock();
+            throw new DataDictionaryException("Table " + tableName.getValue() + " does not exist");
+        }
+        registeredTables.remove(tableName);
+        tablesLock.writeLock().unlock();
     }
 
     public Collection<Identifier> getTableColumnNames(Identifier tableName) {
-        return registeredTables.get(tableName).getColumnNames();
+        tablesLock.readLock().lock();
+        Collection<Identifier> tableColumnNames = registeredTables.get(tableName).getColumnNames();
+        tablesLock.readLock().unlock();
+        return tableColumnNames;
     }
 
     public List<Column> getTableColumnsAsList(Identifier tableName) {
-        return registeredTables.get(tableName).getColumnsAsList();
+        tablesLock.readLock().lock();
+        List<Column> tableColumnsList = registeredTables.get(tableName).getColumnsAsList();
+        tablesLock.readLock().unlock();
+        return tableColumnsList;
     }
 
     public Column getColumnInfo(Identifier tableName, Identifier columnName) {
-        return registeredTables.get(tableName).getColumn(columnName);
+        tablesLock.readLock().lock();
+        Column column = registeredTables.get(tableName).getColumn(columnName);
+        tablesLock.readLock().unlock();
+        return column;
     }
 
     /**
      * Returns table Column that stands on index position, starting from 0
      * @param tableName
-     * @param columnPosition
      * @return
      */
     public Column getColumnInfo(Identifier tableName, int index) {
-        return registeredTables.get(tableName).getColumn(index);
+        tablesLock.readLock().lock();
+        Column column = registeredTables.get(tableName).getColumn(index);
+        tablesLock.readLock().unlock();
+        return column;
+
     }
 
-    public void deregisterTable(Identifier tableName) throws DataDictionaryException {
-        if (!registeredTables.containsKey(tableName)) {
-            throw new DataDictionaryException("Table " + tableName.getValue() + " does not exist");
-        } else {
-            registeredTables.remove(tableName);
-        }
-    }
 
     public boolean tableExists(Identifier tableName) {
-        return registeredTables.containsKey(tableName);
+        tablesLock.readLock().lock();
+        boolean exists = registeredTables.containsKey(tableName);
+        tablesLock.readLock().unlock();
+        return exists;
     }
-
 
     /**
      * Returns unmodifiable view into database metadata. View gets updates when metadate in DB get modified (by DDL for example), and you DO NOT need to reload it again to have it up to date
      * @return
      */
     public DatabaseMetaDataView getDatabaseMetaData() {
-        return new DatabaseMetaDataView();
+        tablesLock.readLock().lock();
+        DatabaseMetaDataView metaDataView = new DatabaseMetaDataView();
+        tablesLock.readLock().unlock();
+        return metaDataView;
     }
 
     /**
      This is immutable view onto (some parts of) database system dictionary
      */
-    private class DatabaseMetaDataView implements clientapi.DatabaseMetaData {
+    private class DatabaseMetaDataView implements DatabaseMetaData {
 
         private final String[] TABLE_METADATA_PSEUDOCOLUMNS = {"TABLE_NAME", "REMARKS"};
         private final String[] COLUMN_METADATA_PSEUDOCOLUMNS = {"TABLE_NAME", "COLUMN_NAME", "DATA_TYPE", "COLUMN_SIZE", "NULLABLE", "REMARKS"};

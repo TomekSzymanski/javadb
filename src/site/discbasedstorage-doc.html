@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+
+    <title>Design and algorithm documentation for the Disk Based Storage</title>
+
+    <STYLE type="text/css">
+        H3 {color :blue}
+    </STYLE>
+</head>
+<body>
+<font face="Arial">
+
+<H3>Loading storage from disk (on DB start)</H3>
+<ol>
+    <li>Storage is singleton and has one factory methods, returning instance.
+        It also has loadFromDisk(String DBDirectory) method that may be called only once and will cause storage to load from disk.
+    </li>
+    <li>
+        Storage loads up: PageBasedStorage calls PageManager to load up.
+        PageManager loads from disk, from special file that is DiskStorage directory.
+        Reads in the list of all <u>pages descriptors</u> (not actual pages).
+        Page descriptor contains:
+        <ul>
+            <li>owningEntityId</li>
+            <li>amount of free contiguous space (does not take into account space of deleted records)</li>
+            <li>location on disk (offset from start of data tablespace)</li>
+        </ul>
+    </li>
+    <li>
+        We do not load or pre-load any data pages into buffer pool. (TODO: this will be optimised later).
+    </li>
+</ol>
+
+<H3>Handling DML operations (INSERT, DELETE and UPDATE)</H3>
+In order to perform any DML, even on single record of page, we have to read whole page into buffer cache and parse it into our list structure.
+Then we operate on the List structure. This is easier to implement. It is the first version.
+<br>
+<br>
+Future enhancements may be:
+<ol>
+<li>reading page from disk into memory and operating on memory buffer directly (no parsing, no serializing). Will be fast for inserts (without compaction) and deleted. Problematic for updates (may need to move records on page - very error prone logic)
+<li>doing DML directly on disk, on the area assigned to the page
+</ol>
+
+<H4>Handling DELETE</H4>
+We set <i>deleted</i> flag to true, and that's it. While serializing we skip records with deleted flag. We do not have any fragmentation as side effect.
+
+<H4>Handling UPDATE</H4>
+<ol>
+    <li>compare record length before and what will be after update</li>
+    <li>if record length after update will be greater, then mark old one as deleted and insert new one at the of current data space.
+        Thanks to it we avoid row migration</li>
+    <li>if record updated length will not be greater than before update, then update in place</li>
+</ol>
+
+<H3>Serialized page format</H3>
+<ol>
+    <li>int: owning entity id (mapping of entity (table, index) name into ID resides in system dictionary. Storage knows only the ID, gets it from dictionary).
+    TODO: this information is redundant here -> we have it in PageRegistry</li>
+    <li>
+        offset to the first record on page (offset to beginning of data area (and end of page header)
+        TODO: consider typical approach: when there is page directory in the beginning of the page, which is a map of record ids into their offsets
+    </li>
+    <li>
+        int: offset of first free space (to insert new record). Disregard deleted records.
+    </li>
+    <li>sum of bytes in all deleted records</li>
+    Data are stored in heap-based method.
+</ol>
+
+
+<H3>Serialized Record format</H3>
+We do not store number of fields in record: it is constant for one table, we can get it from the system dictionary
+<ol>
+    <li>record id (unique within one page). You calculate record id that is unique across whole DB system by composing page id and this record id. This will be needed for indexes (to have reference to record by id, not by offset)</li>
+    <li>one byte for <i>deleted</i> flag</li>
+    <li>short representing total record length: this is sum of next two points.
+        This one seems redundant, as you can calculate it from point 3, but it will be needed to quickly jump to the next record</li>
+    <li>list of every field length, every one as short (list of shorts)</li>
+    <li>list of fields, not field separators needed (we calculated positions from field length list</li>
+</ol>
+No separator for record fields, or separator between records is needed.
+
+<H3>Reading all page records (SELECT)</H3>
+zaczynamy od poczatku strony i jedziemy az do osiagniecia offsetu gdzie zaczyna sie wolne miejsce (trzymane w int, na poczatku strony):
+<ol>
+<li>czytamy flage deleted, jak jest deleted to pomijamy ten rekord. jezeli pomijamy to czytamy nastepnego shorta (czyli pozostala dlugosc rekordu) i skaczemy o tyle do przodu</li>
+<li>czytamy dlugosci rekorow (pole 3: czyli wczytujemy tyle shortow, ale jest pol w rekordzie (to ze slownika)) do jakies tablicy/listy tymczasowej z dlugosciami
+na podstawie informacji o dlugosciach (poprzednie) ORAZ informacji z slownika systemowego jakie typu to danych sa, tworzymy te dane (fabryki z DataTypeValues), pakujemy do listy, które bedzie zwrócona (czy tam iterator do niej).</li>
+<li>When we do point 2. then our page contains a List of all records (List<List<DataTypeValue>>).
+    It makes sense to keep it in memory in this format, becasue we storre pages in buffer pool for next selects. And next select will require data in List format. (do not spend time on parsing byte array and object creation again)</li>
+</ol>
+</br>
+
+
+<H3>Reading all table records (SELECT), across all pages</H3>
+jak dziala iterowanie po wszystkich rekordach, po wszystkich stronach?
+1. Page manager wskazuje wszystkie strony ktore maja dane owningEntityId
+2. dla wszsytkich stron wskazanych w punkcie 1. skoro mamy przeczytac ich dane.. .
+to wczytujemy je do buffer cache (wczesniej sprawdzamy czy juz ich w buffer cache nie ma) -> czyli wolamy buffer cache o strone (jak nie ma w sobie to wczyta)
+3. wczytanie strony do buffer cache (czyli z dysku do pamieci), polega na tym ze strona sie inicjalizuje, czyli zczytuje caly swój bufor, i tworzy, na podstawie jego danych kolekcje List<List<DataTypeValue>>. trzeba sparsowac te dane przy wczytaniu, bo i tak beda wlasnie w takim formacie wlasnie List<List<DataTypeValue>> potrzebne.
+    4. strona ma metode która zwraca iterator do listy z punktu 3.
+    5. sama iteracje robimy tak: dla wszyskich stron danego entity wolamy po kolei iterator do rekordow tej strony. Jak jeden sie skonczy (hasNext() zwroci false), to jedziemy z kolejnym: moze uzyc interatora zlaczajacego z guava.
+    TEraz: jak zrobic aby odczyty zrobic w potoku: aby po zaczytaniu pierwszej strony do buffer cache (albo pobraniu z buffer cache) juz zwrocic pierwsze rezultaty do klienta i:
+    - nie czekac az sie zaladuje wszystkie do buffer cache i sparsuja
+    - nie ladowac niepotrzebnie do buffer cache i parsowac, skoro klient moze nie zawolac o wiecej rekordow
+    - a moze wlasnie zaladowac te wiecej rekordow do jakiegos bufora (bufor per query), klient niech czyta z bufora. Z kolei inny watek bedzie do tego bufowa dopychal (i czekal jak nie bedzie gdzie wpisac)
+    > W pierwszej wersji zrobic to synchronicznie: czyli konieczne wczytanie wszystkich stron do bufora, zanim zwrócimy iterator
+
+
+
+    <H3>NEXT TODO:</H3>
+    - Co bedzie potem z indexami -> na co one beda wskazywac? Co bedzie rowid? Co jak bedzie compactowanie strony -> dane indexu tez trzeba bedzie zaktualizowac
+    - dodac widok systemowy do na stan pages tabeli. rather programatic access
+    - handle row migration (wiersz za duzy dla jednego page): wtedy zapisujemy tylko wskaznik do innej, specjalnej overflow page (znacznie wiekszej), gdzie beda trzymane takie giganty.
+    ALBO: wiersz jest trzymany na wielu stronach (podzielony): wtedy ostatnie pole rekordu danej strony jest wskaźnikiem na kolejną strone gdzie rekord jest kontynuowany
+    - what with fields (of one record) that exceed page size
+
+    nie warto:
+    - zauwazmy ze jak mamy tabele z fieldami tylko fixed lenght, to nie musimy trzymac tych wielkosci per kazdy rekord.
+    Podobnie nie musimy trzymac tych informacji dla wszelkich innych które nie sa variable lenght (poprzedzajace je na przyklad. Albo nastepujace).
+    Te stale mozna zczytac z slownika, a tylko variable-size lenght czymac razem z rekordem.
+    Ale wtedy znowu co z nullami: rezerwujmey na nulla taki sam space jak na np int? jak reprezentujemy nulla? Teraz nulle beda tak reprezentowane ze kolejne offsety beda takie same (nic miedzy nimi). Albo np na poczatku rekordu trzymac:
+    - liczba nulli w wierszu
+    - lista indexow pól które pola rekordu sa nullami
+
+    - Na razie nie obslugujemy defragmentacji. zostawic to na potem.
+
+
+</font>
+</body>
+</html>

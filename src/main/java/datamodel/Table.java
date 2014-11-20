@@ -33,7 +33,6 @@ public class Table {
         return (Column)columnMap.values().toArray()[index];
     }
 
-
     public Column getColumn(Identifier columnName) {
         Column info = columnMap.get(columnName);
         Validate.notNull(info, "Invalid column name %s for table %s", columnName, tableName);

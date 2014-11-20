@@ -48,11 +48,14 @@ class InsertExecutor implements CommandExecutor<InsertCommand> {
         List<DataTypeValue> valuesOfRecordToInsert = new LinkedList<>();
 
         if (columnsSpecifiedInINSERT.size() > 0)  { // column list specified
+
+            // check if all NOT NULL columns have been specified
+            tableColumnNamesList.stream()
+                    .filter(column -> dictionary.getColumnInfo(tableName, column).isNotNull)
+                    .filter(column -> !columnsSpecifiedInINSERT.contains(column))
+                    .findFirst().ifPresent(column -> {throw new SQLException("Not null column " + column + " not specified in the INTO column specification clause");});
+
             for (Identifier column : tableColumnNamesList) {
-                // check if all NOT NULL columns have been specified
-                if ((dictionary.getColumnInfo(tableName, column).isNotNull) && !columnsSpecifiedInINSERT.contains(column)) {
-                    throw new SQLException("Not null column " + column + " not specified in the INTO column specification clause");
-                }
                 // column was specified in insert list
                 if (columnsSpecifiedInINSERT.contains(column)) {
                     int position = columnsSpecifiedInINSERT.indexOf(column);

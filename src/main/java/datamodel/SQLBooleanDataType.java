@@ -1,5 +1,8 @@
 package datamodel;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 /**
  * Created on 2014-11-01.
  */
@@ -36,4 +39,11 @@ public class SQLBooleanDataType extends SQLDataType {
     public String getTypeName() {
         return SQLDataType.BOOLEAN;
     }
+
+    @Override
+    public DataTypeValue readValue(ObjectInputStream is, int numberOfBytesToRead) throws IOException {
+        boolean valueRead = is.readBoolean();
+        return valueRead ? BooleanValue.TRUE : BooleanValue.FALSE;
+    }
+
 }

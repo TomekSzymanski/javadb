@@ -1,13 +1,17 @@
 package datamodel;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+
 /**
  * Created on 2014-11-01.
  */
-public abstract class SQLDataType {
+public abstract class SQLDataType implements Serializable {
 
-    static final String NUMBER = "NUMBER";
-    static final String VARCHAR = "VARCHAR";
-    static final String BOOLEAN = "BOOLEAN";
+    public static final String NUMBER = "NUMBER";
+    public static final String VARCHAR = "VARCHAR";
+    public static final String BOOLEAN = "BOOLEAN";
 
     public abstract int getFieldSizeSpecifier(int index);
 
@@ -22,5 +26,7 @@ public abstract class SQLDataType {
     }
 
     public abstract String getTypeName();
+
+    public abstract DataTypeValue readValue(ObjectInputStream is, int numberOfBytesToRead) throws IOException;
 
 }

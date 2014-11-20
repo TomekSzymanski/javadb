@@ -1,12 +1,19 @@
 package datamodel;
 
+import java.io.Serializable;
+
 /**
  * Created on 2014-10-21.
  */
-public class Column {
+public class Column implements Serializable {
 
     public Identifier columnName;
     public SQLDataType dataType;
+
+    public SQLDataType getDataType() {
+        return dataType;
+    }
+
     public boolean isNotNull;
     public String columnComment;
 
