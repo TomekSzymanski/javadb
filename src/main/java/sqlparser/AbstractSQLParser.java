@@ -4,7 +4,6 @@ import datamodel.Identifier;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,21 +30,12 @@ public abstract class AbstractSQLParser<T extends  AbstractSQLCommand> implement
     static final String NULL = "NULL";
     public static final String ASTERISK = "*";
 
-    private static final String[] RESERVED_KEYWORDS = {"SELECT", "CREATE", "FROM", "TABLE", "WHERE", "INSERT", "INTO", "VALUES", "DROP", "DELETE",
-            "NOT", "NULL",
-            "NUMBER", "VARCHAR", "BOOLEAN", ASTERISK};
-
-    public static boolean isReservedKeyword(String value) {
-        return Arrays.stream(RESERVED_KEYWORDS).anyMatch(keyword -> keyword.equals(value));
-    }
-
     List<Identifier> parseIdentifierList(List<String> list) throws SQLParseException {
         List<String> elements;
         try {
             elements = parseCommaSeparatedList(list);
         } catch (IllegalArgumentException e) {
-            throw new SQLParseException("No identifiers specified OR Missing comma in identifiers list");
-             // TODO how to differentiate exceptions
+            throw new SQLParseException("No identifiers specified or missing comma in identifiers list", e);
         }
         return elements.stream().map(Identifier::new).collect(Collectors.toList());
     }

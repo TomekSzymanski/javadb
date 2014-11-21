@@ -1,10 +1,7 @@
 package executors;
 
-import clientapi.SQLException;
-import storageapi.Storage;
 import sqlparser.DropTableCommand;
-import sqlparser.AbstractSQLCommand;
-import systemdictionary.DataDictionaryException;
+import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
 /**

@@ -89,10 +89,10 @@ zaczynamy od poczatku strony i jedziemy az do osiagniecia offsetu gdzie zaczyna 
 <li>czytamy flage deleted, jak jest deleted to pomijamy ten rekord. jezeli pomijamy to czytamy nastepnego shorta (czyli pozostala dlugosc rekordu) i skaczemy o tyle do przodu</li>
 <li>czytamy dlugosci rekorow (pole 3: czyli wczytujemy tyle shortow, ale jest pol w rekordzie (to ze slownika)) do jakies tablicy/listy tymczasowej z dlugosciami
 na podstawie informacji o dlugosciach (poprzednie) ORAZ informacji z slownika systemowego jakie typu to danych sa, tworzymy te dane (fabryki z DataTypeValues), pakujemy do listy, które bedzie zwrócona (czy tam iterator do niej).</li>
-<li>When we do point 2. then our page contains a List of all records (List<List<DataTypeValue>>).
+<li>When we do point 2. then our page contains a List of all records (<code>List&lt;Record&gt;</code>).
     It makes sense to keep it in memory in this format, becasue we storre pages in buffer pool for next selects. And next select will require data in List format. (do not spend time on parsing byte array and object creation again)</li>
 </ol>
-</br>
+<br/>
 
 
 <H3>Reading all table records (SELECT), across all pages</H3>
@@ -100,7 +100,7 @@ jak dziala iterowanie po wszystkich rekordach, po wszystkich stronach?
 1. Page manager wskazuje wszystkie strony ktore maja dane owningEntityId
 2. dla wszsytkich stron wskazanych w punkcie 1. skoro mamy przeczytac ich dane.. .
 to wczytujemy je do buffer cache (wczesniej sprawdzamy czy juz ich w buffer cache nie ma) -> czyli wolamy buffer cache o strone (jak nie ma w sobie to wczyta)
-3. wczytanie strony do buffer cache (czyli z dysku do pamieci), polega na tym ze strona sie inicjalizuje, czyli zczytuje caly swój bufor, i tworzy, na podstawie jego danych kolekcje List<List<DataTypeValue>>. trzeba sparsowac te dane przy wczytaniu, bo i tak beda wlasnie w takim formacie wlasnie List<List<DataTypeValue>> potrzebne.
+3. wczytanie strony do buffer cache (czyli z dysku do pamieci), polega na tym ze strona sie inicjalizuje, czyli zczytuje caly swój bufor, i tworzy, na podstawie jego danych kolekcje List<Record>. trzeba sparsowac te dane przy wczytaniu, bo i tak beda wlasnie w takim formacie wlasnie List<Record> potrzebne.
     4. strona ma metode która zwraca iterator do listy z punktu 3.
     5. sama iteracje robimy tak: dla wszyskich stron danego entity wolamy po kolei iterator do rekordow tej strony. Jak jeden sie skonczy (hasNext() zwroci false), to jedziemy z kolejnym: moze uzyc interatora zlaczajacego z guava.
     TEraz: jak zrobic aby odczyty zrobic w potoku: aby po zaczytaniu pierwszej strony do buffer cache (albo pobraniu z buffer cache) juz zwrocic pierwsze rezultaty do klienta i:

@@ -7,7 +7,7 @@ public abstract class AbstractSQLCommand {
 
     private Type type;
 
-    public AbstractSQLCommand(Type type) {
+    AbstractSQLCommand(Type type) {
         this.type = type;
     }
 

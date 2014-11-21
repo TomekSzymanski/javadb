@@ -2,7 +2,7 @@ package executors;
 
 import clientapi.Connection;
 import clientapi.SQLException;
-import discstorage.CollectionBasedInMemoryStorage;
+import storageapi.CollectionBasedInMemoryStorage;
 import integrationtests.IntegrationTestsBase;
 import org.junit.Test;
 import storageapi.Storage;

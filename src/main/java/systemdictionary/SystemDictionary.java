@@ -5,6 +5,7 @@ import clientapi.ResultSet;
 import datamodel.*;
 import executors.IteratorBasedResultSet;
 import storageapi.DataStoreException;
+import storageapi.Record;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,14 +23,14 @@ public class SystemDictionary {
 
     private static SystemDictionary INSTANCE;
 
-    public synchronized static SystemDictionary getInstance() {
+    public static synchronized SystemDictionary getInstance() {
         if (INSTANCE==null) {
             throw new IllegalStateException("trying to get reference to not initialized dictionary");
         }
         return INSTANCE;
     }
 
-    public synchronized static SystemDictionary createEmptyDictionary() {
+    public static synchronized SystemDictionary createEmptyDictionary() {
         if (INSTANCE != null) {
             throw new IllegalStateException("Trying to initialize already initialized system dictionary");
         }
@@ -40,7 +41,7 @@ public class SystemDictionary {
     /**
      * Loads system dictionary from storage
      */
-    public synchronized static SystemDictionary loadSystemDictionary(File systemDictionaryFile) {
+    public static synchronized SystemDictionary loadSystemDictionary(File systemDictionaryFile) {
         if (INSTANCE != null) {
             throw new IllegalStateException("Trying to initialize already initialized system dictionary");
         }
@@ -48,12 +49,10 @@ public class SystemDictionary {
         if (systemDictionaryFile.length() == 0) { // new database created, have to initialize itself as empty registry
             INSTANCE = new SystemDictionary();
         } else { // system dictionary file not empty -> boot itself from that file
-            try { // TODO: too many try? (first is try-with-resources)
-                try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(systemDictionaryFile))) {
-                    INSTANCE = (SystemDictionary) input.readObject();
-                }
+            try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(systemDictionaryFile))) {
+                INSTANCE = (SystemDictionary) input.readObject();
             } catch (IOException | ClassNotFoundException e) {
-                throw new DataStoreException(e);
+                throw new DataStoreException("Unable to load system dictionary from disk file" + e);
             }
         }
         return INSTANCE;
@@ -157,12 +156,12 @@ public class SystemDictionary {
         }
 
 
-        private List<List<DataTypeValue>> getTablesMetadata(String tableNameRegex) {
-            List<List<DataTypeValue>> tablesMetadata = new ArrayList<>();
+        private List<Record> getTablesMetadata(String tableNameRegex) {
+            List<Record> tablesMetadata = new ArrayList<>();
             for (Table table : registeredTables.values()) {
                 Identifier tableName = table.getTableName();
                 if (Pattern.matches(tableNameRegex, tableName.getValue())) {
-                    List<DataTypeValue> tableMetadataRecord = new ArrayList<>();
+                    Record tableMetadataRecord = new Record();
                     tableMetadataRecord.add(new VarcharValue(tableName.getValue()));
                     tableMetadataRecord.add(new VarcharValue(table.getTableComment()));
                     tablesMetadata.add(tableMetadataRecord);
@@ -171,19 +170,19 @@ public class SystemDictionary {
             return tablesMetadata;
         }
 
-        private List<List<DataTypeValue>> getColumnsMetadata(String tableNameRegex, String columnNameRegex) {
-            List<List<DataTypeValue>> columnsMetadata = new ArrayList<>();
-            for (Table table : registeredTables.values()) {
+        private List<Record> getColumnsMetadata(String tableNameRegex, String columnNameRegex) {
+            List<Record> columnsMetadata = new ArrayList<>();
+            for (Table table : registeredTables.values()) { //TODO replace (some of at least) with lambda
                 Identifier tableName = table.getTableName();
                 if (Pattern.matches(tableNameRegex, tableName.getValue())) {
                     for (Column column : table.getColumnsAsList()) {
                         if (Pattern.matches(columnNameRegex, column.columnName.getValue())) {
-                            List<DataTypeValue> columnMetadataRecord = new ArrayList<>();
+                            Record columnMetadataRecord = new Record();
                             columnMetadataRecord.add(new VarcharValue(tableName.getValue())); // TABLE_NAME
                             columnMetadataRecord.add(new VarcharValue(column.columnName.getValue())); // COLUMN_NAME
                             columnMetadataRecord.add(new VarcharValue(column.dataType.getTypeName())); // DATA_TYPE
                             columnMetadataRecord.add(new IntegerValue(column.dataType.getFieldSizeSpecifier(0))); // COLUMN_SIZE
-                            columnMetadataRecord.add(BooleanValue.valueOf(!column.isNotNull)); // NULLABLE
+                            columnMetadataRecord.add(BooleanValue.valueOf(column.nullable == Column.Nullable.NULLABLE)); // NULLABLE
                             columnMetadataRecord.add(new VarcharValue(column.columnComment)); // REMARKS
                             columnsMetadata.add(columnMetadataRecord);
                         }
@@ -202,7 +201,7 @@ public class SystemDictionary {
          */
         @Override
         public ResultSet getTables(String tableNamePattern) {
-            return new IteratorBasedResultSet<>(getTablesMetadata(tableNamePattern).iterator(), getTableMetadataPseudocolumnsList());
+            return new IteratorBasedResultSet(getTablesMetadata(tableNamePattern).iterator(), getTableMetadataPseudocolumnsList());
         }
 
         /**
@@ -221,7 +220,7 @@ public class SystemDictionary {
          */
         @Override
         public ResultSet getColumns(String tableNamePattern, String columnNamePattern) {
-            return new IteratorBasedResultSet<>(getColumnsMetadata(tableNamePattern, columnNamePattern).iterator(), getColumnMetadataPseudocolumnsList());
+            return new IteratorBasedResultSet(getColumnsMetadata(tableNamePattern, columnNamePattern).iterator(), getColumnMetadataPseudocolumnsList());
         }
     }
 }

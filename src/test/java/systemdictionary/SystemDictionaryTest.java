@@ -7,7 +7,6 @@ import datamodel.Table;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.fail;
 
 /**
  * Created on 2014-11-08.

@@ -7,17 +7,15 @@ import java.io.*;
  */
 public class SerializationUtils {
     public static <T> T serializeDeserialize(T beforeSerialization) throws IOException, ClassNotFoundException {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        ObjectOutputStream out = new ObjectOutputStream(bout);
-        out.writeObject(beforeSerialization);
+        byte[] bytes;
+        try ( ByteArrayOutputStream bout = new ByteArrayOutputStream();  ObjectOutput out = new ObjectOutputStream(bout) ) {
+            out.writeObject(beforeSerialization);
+            bytes = bout.toByteArray();
+        }
 
-        byte[] bytes = bout.toByteArray();
-        out.close();
-
-        ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
-        ObjectInputStream in = new ObjectInputStream(bin);
-        T deserialized = (T)in.readObject();
-        in.close();
-        return deserialized;
+        try ( ByteArrayInputStream bin = new ByteArrayInputStream(bytes); ObjectInput in = new ObjectInputStream(bin) ) {
+            T deserialized = (T)in.readObject();
+            return deserialized;
+        }
     }
 }

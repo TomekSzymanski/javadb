@@ -10,7 +10,7 @@ import java.io.File;
  */
 public class DiskLoaderTest extends PageLoaderTest {
 
-    private final static File testDataFile = new File("someTestDataFile");
+    private static final File testDataFile = new File("someTestDataFile");
     private static final PageLoader loader = DiskLoader.createNewLoader(testDataFile);
 
     @Override

@@ -1,6 +1,5 @@
 package executors;
 
-import sqlparser.AbstractSQLCommand;
 import sqlparser.DeleteTableCommand;
 import storageapi.Storage;
 

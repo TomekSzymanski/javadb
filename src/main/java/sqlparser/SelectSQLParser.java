@@ -69,7 +69,7 @@ class SelectSQLParser extends AbstractSQLParser<SelectCommand> {
     <SELECT_LIST>  ::= <asterisk> | <identifier> | <quoted_string> [ { <comma> <identifier> | <quoted_string> }... ]
      */
     private void parseSelectList(Tokenizer tokenizer, List<String> columnList) throws SQLParseException {
-        if (columnList.size() == 0) {
+        if (columnList.isEmpty()) {
             throw new SQLParseException("No column list provided");
         }
         // either asterisk ONLY or the select list
@@ -100,7 +100,7 @@ class SelectSQLParser extends AbstractSQLParser<SelectCommand> {
       <TABLE_REFERENCE_LIST> ::= <identifier> [ { <comma> <identifier> }... ]
     */
     private void parseFromClause(List<String> tableList) throws SQLParseException {
-        if (tableList.size() == 0) {
+        if (tableList.isEmpty()) {
             throw new SQLParseException("No table list provided");
         }
         ast.addTables(parseIdentifierList(tableList));

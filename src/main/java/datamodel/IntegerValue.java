@@ -34,9 +34,8 @@ public class IntegerValue extends DataTypeValue {
 
         IntegerValue that = (IntegerValue) o;
 
-        if (value != that.value) return false;
+        return value == that.value;
 
-        return true;
     }
 
     @Override
@@ -61,7 +60,7 @@ public class IntegerValue extends DataTypeValue {
     }
 
     @Override
-    public int length() {
+    public int byteLength() {
         return 4;
     }
 

@@ -1,17 +1,18 @@
 package discstorage;
 
-import datamodel.DataTypeValue;
 import datamodel.Identifier;
+import org.apache.commons.collections.iterators.IteratorChain;
 import org.apache.commons.lang3.Validate;
 import storageapi.DataStoreException;
 import storageapi.PersistentStorage;
+import storageapi.Record;
+import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.*;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created on 2014-11-13.
@@ -23,10 +24,7 @@ public class PageBasedStorage implements PersistentStorage {
     private static final String dataFileName = "data.dat";
 
     private File systemTablespaceFile;
-    private File pageRegistryFile;
     static File dataFile;
-
-    private PageLoader pageLoader;
 
     private PageRegistry pageRegistry;
 
@@ -50,9 +48,9 @@ public class PageBasedStorage implements PersistentStorage {
 
         // we initialize pageLoader before we initialize pageRegistry, as loader is needed for Pages (which are needed by Registry)
         dataFile = new File(databaseDirectoryPath, dataFileName);
-        pageLoader = DiskLoader.createNewLoader(dataFile); // TODO replace with interface call
+        DiskLoader.createNewLoader(dataFile);
 
-        pageRegistryFile = new File(databaseDirectoryPath, pageRegistryFileName);
+        File pageRegistryFile = new File(databaseDirectoryPath, pageRegistryFileName);
         pageRegistry = PageRegistry.loadFromDisk(pageRegistryFile, SystemDictionary.getInstance());
 
     }
@@ -89,10 +87,6 @@ public class PageBasedStorage implements PersistentStorage {
         INSTANCE = new PageBasedStorage(databaseDirectoryPath);
     }
 
-    public static void openOrCreateDatabaseOnDisk(String testDiskDBDirectoryString) {
-
-    }
-
     private static void validateDirectoryPrivilleges(File databaseDirectory) {
         Validate.isTrue(databaseDirectory.canRead(), "Missing privileges to read the directory %s", databaseDirectory);
         Validate.isTrue(databaseDirectory.canWrite(), "Missing privileges to write the directory %s", databaseDirectory);
@@ -107,7 +101,7 @@ public class PageBasedStorage implements PersistentStorage {
     }
 
 
-    public static PageBasedStorage getInstance() {
+    public static Storage getInstance() {
         if (INSTANCE==null) {
             throw new IllegalStateException("Cannot get instance of not initialized storage object");
         }
@@ -128,7 +122,7 @@ public class PageBasedStorage implements PersistentStorage {
     }
 
     @Override
-    public void insertRecord(Identifier tableName, List<DataTypeValue> recordValues) throws DataStoreException {
+    public void insertRecord(Identifier tableName, Record recordValues) throws DataStoreException {
         int recordLength = Page.getRecordValuesAndHeaderSize(recordValues);
         Page freePage = pageRegistry.findPageWithFreeSpace(tableName, recordLength);
         freePage.registerTable(tableName);
@@ -136,16 +130,10 @@ public class PageBasedStorage implements PersistentStorage {
     }
 
     @Override
-    public Iterator<List<DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException {
-        List<List<DataTypeValue>> allRecords = new ArrayList<>();
-        // TODO: replace later with concatenating every page iterators or creating concatenating iterator. Having it up front loaded into one collection will be huge memory pain
-
-        List<List<DataTypeValue>> pageRecords;
-        for (Page page : pageRegistry.getPageList(tableName)) {
-            pageRecords = page.getAllRecords();
-            allRecords.addAll(pageRecords);
-        }
-        return allRecords.iterator();
+    public Iterator<Record> tableIterator(Identifier tableName) throws DataStoreException {
+        List<Iterator<Record>> iteratorsList = pageRegistry.getPageList(tableName).stream()
+                .map(Page::iterator).collect(Collectors.toList());
+        return (Iterator<Record>)new IteratorChain(iteratorsList);
     }
 
     @Override
@@ -162,12 +150,10 @@ public class PageBasedStorage implements PersistentStorage {
 
     @Override
     public void writeSystemDictionary(SystemDictionary dictionary) throws DataStoreException {
-        try {
-            try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(systemTablespaceFile))) {
-                output.writeObject(dictionary);
-            }
+        try (ObjectOutput output = new ObjectOutputStream(new FileOutputStream(systemTablespaceFile))) {
+            output.writeObject(dictionary);
         } catch (IOException e) {
-            throw new DataStoreException(e);
+            throw new DataStoreException("Error writing system dictiionary to disk file", e);
         }
     }
 }

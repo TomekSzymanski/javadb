@@ -1,4 +1,9 @@
-package datamodel;
+package storageapi;
+
+import datamodel.Column;
+import datamodel.SQLDataType;
+import datamodel.SQLVarcharDataType;
+import datamodel.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +16,11 @@ import java.util.stream.Collectors;
 public class RandomRecordGenerator {
 
     /**
-    * Randomly generates records(of type List<DataTypeValue>).
+    * Randomly generates records(of type Record).
      * Field types are chosen on random before each generation
     * @return
     **/
-    public static List<List<DataTypeValue>> generate(Table table, int numberOfRecords) {
+    public static List<Record> generate(Table table, int numberOfRecords) {
 //        // choose field data types first (at random)
 //        List<SQLDataType> fieldDataTypeFactories = new ArrayList<>();
 //        Random rand = new Random();
@@ -30,10 +35,10 @@ public class RandomRecordGenerator {
         List<SQLDataType> fieldDataTypeFactories = table.getColumnsAsList().stream().map(Column::getDataType).collect(Collectors.toList());
 
         // create actual records (at random)
-        List<List<DataTypeValue>> generatedRecords = new ArrayList<>();
+        List<Record> generatedRecords = new ArrayList<>();
         Random randValue = new Random();
         for (int i = 0; i < numberOfRecords; i++) {
-            List<DataTypeValue> record = new ArrayList<>();
+            Record record = new Record();
             for (SQLDataType dataTypeFactory : fieldDataTypeFactories) {
                 if (dataTypeFactory.getClass() == SQLVarcharDataType.class) {
                     record.add(dataTypeFactory.valueOf(String.valueOf(randValue.nextInt((int)Math.pow(10, dataTypeFactory.getFieldSizeSpecifier(0))))));

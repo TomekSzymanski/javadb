@@ -39,7 +39,7 @@ public class VarcharValue extends DataTypeValue {
     }
 
     @Override
-    public int length() {
+    public int byteLength() {
         return value.length() * 2; // char is represented on two bytes (in serialization)
 
     }
@@ -56,9 +56,8 @@ public class VarcharValue extends DataTypeValue {
 
         VarcharValue that = (VarcharValue) o;
 
-        if (!value.equals(that.value)) return false;
+        return value.equals(that.value);
 
-        return true;
     }
 
     @Override

@@ -20,7 +20,7 @@ class PageRegistry {
 
     private static final int NUM_PAGES = 1000;
 
-    private transient static SystemDictionary systemDictionary;
+    private static SystemDictionary systemDictionary;
 
     private List<Page> allPages = new ArrayList<>();
 
@@ -41,10 +41,8 @@ class PageRegistry {
         if (pageRegistryFile.length() == 0) { // new database created, have to initialize itself as empty registry
             INSTANCE = new PageRegistry(systemDictionary);
         } else { // registry file not empty -> boot itself from that file
-            try { // TODO: too many try? (first is try-with-resources)
-                try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(pageRegistryFile))) {
-                    INSTANCE = (PageRegistry) input.readObject();
-                }
+            try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(pageRegistryFile))) {
+                INSTANCE = (PageRegistry) input.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 throw new DataStoreException(e);
             }
@@ -53,7 +51,7 @@ class PageRegistry {
     }
 
     private PageRegistry(SystemDictionary systemDictionary) {
-        this.systemDictionary = systemDictionary;
+        PageRegistry.systemDictionary = systemDictionary;
         initializeEmptyRegistry();
     }
 
@@ -79,10 +77,13 @@ class PageRegistry {
     }
 
     public Page findPageWithFreeSpace(Identifier entity, int recordLength) {
-        Optional<Page> nextFreePage = allPages.stream().filter(p -> p.freeCapacity() >= recordLength).findFirst();
+        Optional<Page> nextFreePage = allPages.stream()
+                    .filter(p -> ((p.getOwningEntityId() == null || p.getOwningEntityId().equals(entity))
+                            && (p.freeCapacity() >= recordLength)))
+                    .findFirst();
         // TODO inefficient iteration thru all pages!
         if (!nextFreePage.isPresent()) {
-            throw new DataStoreException("Unable to find free page for data of size " + recordLength + " belonging to " + entity);
+            throw new DataStoreException("Unable to find free page for data of size " + recordLength + " for table " + entity);
         }
         return nextFreePage.get();
     }
@@ -96,12 +97,6 @@ class PageRegistry {
         // TODO inefficient iteration thru all pages
         return allPages.stream().filter(p -> ((p.getOwningEntityId() != null) && p.getOwningEntityId().equals(entity))).collect(Collectors.toList());
     }
-
-
-//    public boolean isAtLeastOnePageAllocated(Identifier entity) {
-//        // TODO inefficient iteration thru all pages, replace with map at least for top used
-//        return allPages.stream().anyMatch(p -> ((p.getOwningEntityId() != null) && p.getOwningEntityId().equals(entity)));
-//    }
 
 }
 

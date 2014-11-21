@@ -2,6 +2,7 @@ package discstorage;
 
 import datamodel.*;
 import org.apache.commons.lang3.Validate;
+import storageapi.Record;
 import systemdictionary.SystemDictionary;
 
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -29,7 +31,7 @@ class Page implements Serializable {
      */
     private int pageId;
 
-    private final static int INITIAL_FREE_SPACE_LEFT = PAGE_SIZE-2000; //TODO tune: what else is written in page??
+    private static final int INITIAL_FREE_SPACE_LEFT = PAGE_SIZE-2000; //TODO tune: what else is written in page?? what if serialized column list is extremely big (>1000?)
 
     private int freeSpaceLeft = INITIAL_FREE_SPACE_LEFT;
 
@@ -42,33 +44,32 @@ class Page implements Serializable {
     private transient SystemDictionary systemDictionary;
 
     // this is not loaded upon page creation. This is loaded only when there is first call to the data.
-    private List<List<DataTypeValue>> records; // page data in parsed List form
+    private List<Record> records; // page data in parsed List form
 
     // for unit testing
-    List<List<DataTypeValue>> getRecords() {
+    List<Record> getRecords() {
         return records;
     }
 
-    public Page(int pageId, Identifier owningEntityId, PageLoader loader, SystemDictionary systemDictionary) {
+    Page(int pageId, Identifier owningEntityId, PageLoader loader, SystemDictionary systemDictionary) {
         this(pageId, owningEntityId, new ArrayList<>(), loader, systemDictionary);
     }
 
-    public Page(int pageId, Identifier owningEntityId, SystemDictionary systemDictionary) {
+    Page(int pageId, Identifier owningEntityId, SystemDictionary systemDictionary) {
         this(pageId, owningEntityId, null,DiskLoader.getInstance(), systemDictionary );
     }
 
-    Page(int pageId, Identifier owningEntityId, List<List<DataTypeValue>> records, SystemDictionary systemDictionary) {
+    Page(int pageId, Identifier owningEntityId, List<Record> records, SystemDictionary systemDictionary) {
         this(pageId, owningEntityId, records, DiskLoader.getInstance(), systemDictionary);
     }
 
     // for unit tests
-    Page(int pageId, Identifier owningEntityId, List<List<DataTypeValue>> records, PageLoader loader, SystemDictionary systemDictionary) {
-        int recordSize = 0;
+    Page(int pageId, Identifier owningEntityId, List<Record> records, PageLoader loader, SystemDictionary systemDictionary) {
         if (records!=null) {
-            recordSize = records.stream().map(record -> getRecordValuesAndHeaderSize(record)).reduce(0, (x, y) -> x + y);
+            int recordSize = records.stream().map(Page::getRecordValuesAndHeaderSize).reduce(0, (x, y) -> x + y);
             Validate.isTrue(recordSize <= freeCapacity(), "size of records to be put on the page, which was %s was too big for page size, which was %s", recordSize, freeCapacity());
         } else {
-            records = new ArrayList<>(); // TODO replace with factory call from RecordValues
+            records = new ArrayList<>(); // TODO replace with factory call from Record
         }
 
         this.pageId = pageId;
@@ -95,7 +96,7 @@ class Page implements Serializable {
         owningEntityId = tableName;
     }
 
-    public void insertRecord(List<DataTypeValue> recordValues) {
+    public void insertRecord(Record recordValues) {
         pageLock.writeLock().lock();
         loadPageData();
         records.add(recordValues);
@@ -105,22 +106,27 @@ class Page implements Serializable {
     }
 
     /**
-     * returns record size in bytes //TODO move it to RecordValues class
-     * @param recordValues
+     * Returns number of bytes that this record will take in this Page serialized form
+     * @param record
      * @return
      */
-    static int getRecordValuesAndHeaderSize(List<DataTypeValue> recordValues) {
-        int headerSize = (int)recordValues.stream().count() * Integer.BYTES; // we write out field lengths as ints
-        int valuesSize = recordValues.stream().mapToInt(DataTypeValue::length).sum();
+    static int getRecordValuesAndHeaderSize(Record record) {
+        int headerSize = record.size() * Integer.BYTES; // we write out field lengths as ints
+        int valuesSize = record.byteLength();
         return headerSize + valuesSize;
     }
 
-    public List<List<DataTypeValue>> getAllRecords() {
+    public List<Record> getAllRecords() {
         pageLock.readLock().lock();
         loadPageData();
         pageLock.readLock().unlock();
         return records;
     }
+
+    public Iterator<Record> iterator() {
+        return getAllRecords().iterator();
+    }
+
 
     public void deleteAllRecords() {
         pageLock.writeLock().lock();
@@ -141,7 +147,7 @@ class Page implements Serializable {
 
     void loadPageData() {
         // TODO: change comment we load data from page loader (for example buffer cache) on purpose, we do not store them in records on purpose, so that they can be evicted (TODO: try weak references here??)
-        records = pageLoader.getPageData(pageId).getRecords();
+        records = pageLoader.getPageData(pageId).records;
     }
 
     void writePageData() {
@@ -189,10 +195,13 @@ class Page implements Serializable {
         int totalRecordNumber = records.size();
         os.writeInt(totalRecordNumber);
 
-        for (List<DataTypeValue> record : records) {
+        for (Record record : records) {
+            if (record.isDeleted()) {
+                continue;
+            }
             // write out list of record field lengths first
             for(DataTypeValue value : record) {
-                os.writeInt(value.length());
+                os.writeInt(value.byteLength());
             }
             // and then actual record data
             for (DataTypeValue value : record) {
@@ -218,14 +227,14 @@ class Page implements Serializable {
 
         int totalRecordNumber = is.readInt();
 
-        List<List<DataTypeValue>> allRecords = new ArrayList<>(numberOfFields);
+        List<Record> allRecords = new ArrayList<>(numberOfFields);
         for (int i = 0; i < totalRecordNumber; i++) {
             // read record lengths first
             for (int j = 0; j < numberOfFields; j++) {
                 recordLengths[j] = is.readInt();
             }
             // read actual data
-            List<DataTypeValue> record = new ArrayList<>(numberOfFields);
+            Record record = new Record();
             for (int j = 0; j < numberOfFields; j++) {
                 DataTypeValue value;
                 if (recordLengths[j] == 0) { // null value

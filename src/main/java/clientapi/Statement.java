@@ -15,6 +15,8 @@ public class Statement {
 
     private ExecutionContext context;
 
+    private SQLParserImpl sqlParser = new SQLParserImpl();
+
     public int getNextFetchSize() {
         return context.nextFetchSize;
     }
@@ -23,20 +25,15 @@ public class Statement {
         this.context.nextFetchSize = nextFetchSize;
     }
 
-    QueryCommandExecutor queryExecutor = CommandExecutorFactory.getQueryExecutorInstance();
-
     /**
      * Executes the given SQL SELECT statement, which returns a single ResultSet object.
      * @param sql
      * @return
      */
     public ResultSet executeQuery(String sql) throws SQLException {
-        try {
-            SelectCommand selectCommand = (SelectCommand) parse(sql);
-            return queryExecutor.executeQuery(selectCommand, context);
-        } catch (ClassCastException e) { //TODO: handle it differently
-            throw new SQLException("Cannot call executeQuery method with non SELECT statement");
-        }
+        SelectCommand selectCommand = sqlParser.parseQuery(sql);
+        QueryCommandExecutor queryExecutor = CommandExecutorFactory.getQueryExecutorInstance();
+        return queryExecutor.executeQuery(selectCommand, context);
     }
 
     /**
@@ -45,7 +42,7 @@ public class Statement {
      * @return number of rows changed.
      */
     public void executeUpdate(String sql) throws SQLException {
-        AbstractSQLCommand SQLCommand = parse(sql);
+        AbstractSQLCommand SQLCommand = sqlParser.parse(sql);
         CommandExecutor executor = CommandExecutorFactory.getInstance(SQLCommand.getType());
         executor.execute(SQLCommand);
     }
@@ -54,8 +51,4 @@ public class Statement {
          executeUpdate(sql);
     }
 
-    private AbstractSQLCommand parse(String sql) {
-        SQLParserImpl parser = new SQLParserImpl();
-        return parser.parse(sql);
-    }
 }

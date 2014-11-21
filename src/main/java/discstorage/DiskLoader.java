@@ -39,11 +39,13 @@ public class DiskLoader implements PageLoader {
             dataFile.seek(pageDataStartOffset);
             byte [] bytes = new byte[Page.PAGE_SIZE];
             dataFile.read(bytes); // TODO consider replacing with new i/o, measure performance in both cases
+            // TODO dataFile not closed?
 
             // 3. transform byte array into Page object (
             ByteArrayInputStream byteIn = new ByteArrayInputStream(bytes);
-            ObjectInputStream objectIn = new ObjectInputStream(byteIn);
+            ObjectInput objectIn = new ObjectInputStream(byteIn); // TODO Objectin not closed. Try-with-resourceS?
             page = (Page)objectIn.readObject();
+            objectIn.close();
         } catch (IOException | ClassNotFoundException e) {
             throw new DataStoreException("Unable to read page from data file. Page id = " + pageId, e);
         }
@@ -55,9 +57,10 @@ public class DiskLoader implements PageLoader {
         try {
             // 1. have page put its data in byte array
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            ObjectOutputStream objectOut = new ObjectOutputStream(bout);
+            ObjectOutput objectOut = new ObjectOutputStream(bout);
             objectOut.writeObject(page);
             byte [] bytes = bout.toByteArray();
+            objectOut.close();
 
             // page data cannot be bigger than page size
             assert bytes.length <= Page.PAGE_SIZE; // this assertion is needed for time of code writing and testing, can be disabled later in production code. It is kind of electric fence alarm, we do not rely on it
@@ -84,6 +87,6 @@ public class DiskLoader implements PageLoader {
         } catch (IOException e) {
             throw new DataStoreException(e);
         }
-    };
+    }
 
 }

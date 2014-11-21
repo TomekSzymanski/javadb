@@ -5,8 +5,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import systemdictionary.SystemDictionary;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -32,10 +34,6 @@ public abstract class StorageGeneralTest {
      * @return
      */
     protected abstract Storage initializeStorage();
-
-    protected List<DataTypeValue> buildRecord(String... fields) {
-        return Arrays.stream(fields).map(VarcharValue::new).collect(Collectors.toList());
-    }
 
     @Test
     public void createAndDropTable() {
@@ -79,18 +77,18 @@ public abstract class StorageGeneralTest {
         storage.createTable(tableName);
 
         Table table = new Table(tableName);
-        table.addColumn(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("whatever2"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
+        table.addColumn(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever2"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
         systemDictionary.registerTable(table);
 
         // when
-        List<DataTypeValue> recordInserted = buildRecord("TOMEK", "romek"); // TODO refactor to use record builder
+        Record recordInserted = RecordBuilder.newRecord().varchar("TOMEK").varchar("romek").build();
         storage.insertRecord(tableName, recordInserted);
-        Iterator<List<DataTypeValue>> iterator = storage.tableIterator(tableName);
+        Iterator<Record> iterator = storage.tableIterator(tableName);
 
         // then
         assertTrue("there should be one record returned", iterator.hasNext());
-        List<DataTypeValue> recordSelected = iterator.next();
+        Record recordSelected = iterator.next();
         assertEquals(2, recordSelected.size());
         assertEquals("TOMEK", recordSelected.get(0).toString());
         assertEquals("romek", recordSelected.get(1).toString());
@@ -108,25 +106,25 @@ public abstract class StorageGeneralTest {
         storage.createTable(tableName);
 
         Table table = new Table(tableName);
-        table.addColumn(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("whatever2"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
+        table.addColumn(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever2"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
         systemDictionary.registerTable(table);
 
         // when
-        List<DataTypeValue> recordInserted1 = buildRecord("tomek", "romek");
-        List<DataTypeValue> recordInserted2 = buildRecord("dog", "cat");
+        Record recordInserted1 = RecordBuilder.newRecord().varchar("tomek").varchar("romek").build();
+        Record recordInserted2 = RecordBuilder.newRecord().varchar("dog").varchar("cat").build();
         storage.insertRecord(tableName, recordInserted1);
         storage.insertRecord(tableName, recordInserted2);
-        Iterator<List<DataTypeValue>> iterator = storage.tableIterator(tableName);
+        Iterator<Record> iterator = storage.tableIterator(tableName);
 
         // then
         assertTrue(iterator.hasNext());
-        List<DataTypeValue> recordSelected1 = iterator.next();
+        Record recordSelected1 = iterator.next();
         assertEquals("tomek", recordSelected1.get(0).toString());
         assertEquals("romek", recordSelected1.get(1).toString());
 
         assertTrue(iterator.hasNext());
-        List<DataTypeValue> recordSelected2 = iterator.next();
+        Record recordSelected2 = iterator.next();
         assertEquals("dog", recordSelected2.get(0).toString());
         assertEquals("cat", recordSelected2.get(1).toString());
 
@@ -143,7 +141,7 @@ public abstract class StorageGeneralTest {
         storage.createTable(tableName);
 
         Table table = new Table(tableName);
-        table.addColumn(new Column(new Identifier("floatColumn"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {20})), false));
+        table.addColumn(new Column(new Identifier("floatColumn"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20))));
 
     }
 
@@ -155,20 +153,20 @@ public abstract class StorageGeneralTest {
         storage.createTable(tableName);
 
         Table table = new Table(tableName);
-        table.addColumn(new Column(new Identifier("whatever1"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("whatever2"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("whatever3"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("whatever4"), SQLDataTypeFactory.getInstance(SQLDataType.BOOLEAN, Collections.emptyList()), false));
-        table.addColumn(new Column(new Identifier("whatever5"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[]{20})), false));
-        table.addColumn(new Column(new Identifier("whatever7"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {20, 20})), false)); // null
-        table.addColumn(new Column(new Identifier("whatever8"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("whatever9"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
+        table.addColumn(new Column(new Identifier("whatever1"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever2"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever3"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever4"), SQLDataTypeFactory.getInstance(SQLDataType.BOOLEAN, Collections.emptyList())));
+        table.addColumn(new Column(new Identifier("whatever5"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever7"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20, 20)))); // null
+        table.addColumn(new Column(new Identifier("whatever8"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("whatever9"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
         // table.addColumn(new Column(new Identifier("whatever6"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[]{20, 20})), false)); TODO handle floats
         systemDictionary.registerTable(table);
 
 
         // when
-        List<DataTypeValue> recordInserted = new ArrayList<>();
+        Record recordInserted = new Record();
         recordInserted.add(new IntegerValue(1));
         recordInserted.add(new IntegerValue(200));
         recordInserted.add(new VarcharValue("tomek"));
@@ -180,11 +178,11 @@ public abstract class StorageGeneralTest {
         //recordInserted.add(new FloatValue("343.232"));
 
         storage.insertRecord(tableName, recordInserted);
-        Iterator<List<DataTypeValue>> iterator = storage.tableIterator(tableName);
+        Iterator<Record> iterator = storage.tableIterator(tableName);
 
         // then
         assertTrue("there should be only one record returned", iterator.hasNext());
-        List<DataTypeValue> recordSelected = iterator.next();
+        Record recordSelected = iterator.next();
         assertEquals(recordInserted.size(), recordSelected.size());
         assertEquals(1, recordSelected.get(0).intValue());
         assertEquals(200, recordSelected.get(1).intValue());
@@ -210,12 +208,12 @@ public abstract class StorageGeneralTest {
         systemDictionary.registerTable(new Table(tableName));
 
         // when
-        List<DataTypeValue> recordInserted = buildRecord("tomek", "romek");
+        Record recordInserted = RecordBuilder.newRecord().varchar("tomek").varchar("romek").build();
         storage.insertRecord(tableName, recordInserted);
 
         // then
         storage.dropTable(tableName);
-        Iterator<List<DataTypeValue>> iterator = storage.tableIterator(tableName);
+        Iterator<Record> iterator = storage.tableIterator(tableName);
         assertFalse(iterator.hasNext());
     }
 
@@ -227,12 +225,12 @@ public abstract class StorageGeneralTest {
         systemDictionary.registerTable(new Table(tableName));
 
         // when
-        List<DataTypeValue> recordInserted = buildRecord("tomek", "romek");
+        Record recordInserted = RecordBuilder.newRecord().varchar("tomek").varchar("romek").build();
         storage.insertRecord(tableName, recordInserted);
 
         // then
         storage.deleteAll(tableName);
-        Iterator<List<DataTypeValue>> iterator = storage.tableIterator(tableName);
+        Iterator<Record> iterator = storage.tableIterator(tableName);
         assertFalse(iterator.hasNext());
 
         // tear down
@@ -250,24 +248,24 @@ public abstract class StorageGeneralTest {
         storage.createTable(tableName);
 
         Table table = new Table(tableName);
-        table.addColumn(new Column(new Identifier("col1"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        table.addColumn(new Column(new Identifier("col2"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {30})), false));
-        table.addColumn(new Column(new Identifier("col3"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {10})), false));
+        table.addColumn(new Column(new Identifier("col1"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        table.addColumn(new Column(new Identifier("col2"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(30))));
+        table.addColumn(new Column(new Identifier("col3"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(10))));
         systemDictionary.registerTable(table);
 
         // when: insert generated records
         int numberOfRecords = 2000;
-        List<List<DataTypeValue>> generatedRecords = recordGenerator.generate(table, numberOfRecords);
+        List<Record> generatedRecords = RandomRecordGenerator.generate(table, numberOfRecords);
         generatedRecords.forEach(record -> storage.insertRecord(tableName, record));
 
-        Iterator<List<DataTypeValue>> iterator = storage.tableIterator(tableName);
+        Iterator<Record> iterator = storage.tableIterator(tableName);
 
         // then
         for (int i = 0; i < generatedRecords.size(); i++) {
             assertTrue("record number " + i + " was not selected", iterator.hasNext());
 
-            List<DataTypeValue> recordSelected = iterator.next();
-            List<DataTypeValue> recordGenerated = generatedRecords.get(i);
+            Record recordSelected = iterator.next();
+            Record recordGenerated = generatedRecords.get(i);
             assertEquals(recordSelected.size(), recordGenerated.size());
 
             // compare every field, according to every data representation (int, string) that can be created from any other data

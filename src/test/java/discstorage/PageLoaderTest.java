@@ -1,7 +1,12 @@
 package discstorage;
 
-import datamodel.*;
+import datamodel.Column;
+import datamodel.Identifier;
+import datamodel.SQLDataType;
+import datamodel.SQLDataTypeFactory;
 import org.junit.Test;
+import storageapi.Record;
+import storageapi.RecordBuilder;
 import systemdictionary.SystemDictionary;
 
 import java.util.ArrayList;
@@ -32,17 +37,17 @@ public abstract class PageLoaderTest {
     @Test
     public void simpleNonEmptyPageWriteRead() {
         Identifier tableName = new Identifier("simpleNonEmptyPageWriteRead");
-        List<List<DataTypeValue>> originalRecords = new ArrayList<>();
+        List<Record> originalRecords = new ArrayList<>();
 
-        originalRecords.add(RecordBuilder.createRecord("tomek", "szcscs", "TTTT"));
-        originalRecords.add(RecordBuilder.createRecord("romek", "cccccc", "RRR"));
+        originalRecords.add(Record.createRecord("tomek", "szcscs", "TTTT"));
+        originalRecords.add(Record.createRecord("romek", "cccccc", "RRR"));
 
         SystemDictionary systemDictionaryMock = mock(SystemDictionary.class);
 
         List<Column> columns = new ArrayList<>();
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[]{20})), false));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
 
         when(systemDictionaryMock.getTableColumnsAsList(tableName)).thenReturn(columns);
 
@@ -54,10 +59,10 @@ public abstract class PageLoaderTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void nonEmptyBigNumberOfRecordsPageWriteRead() {
-        List<List<DataTypeValue>> originalRecords = new ArrayList<>();
+        List<Record> originalRecords = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            originalRecords.add(RecordBuilder.buildRecord().number(10).varchar("tomek").varchar("scsdcscds").bool(false).build());
+            originalRecords.add(RecordBuilder.newRecord().number(10).varchar("tomek").varchar("scsdcscds").bool(false).build());
         }
 
         Page originalPage = new Page(10, null, originalRecords, systemDictionaryStub);
@@ -69,11 +74,11 @@ public abstract class PageLoaderTest {
     @Test
     public void validateTheSameNumberOfRecordsSelectedAsInserted() {
         Identifier tableName = new Identifier("validateTheSameNumberOfRecordsSelectedAsInserted");
-        List<List<DataTypeValue>> originalRecords = new ArrayList<>();
+        List<Record> originalRecords = new ArrayList<>();
         final int numRecords = 30;
 
         for (int i = 0; i < numRecords; i++) {
-            originalRecords.add(RecordBuilder.buildRecord()
+            originalRecords.add(RecordBuilder.newRecord()
                     .number(i)
                     .varchar(String.valueOf(i))
                     .varchar("scsdcscds")
@@ -84,10 +89,10 @@ public abstract class PageLoaderTest {
         SystemDictionary systemDictionaryMock = mock(SystemDictionary.class);
 
         List<Column> columns = new ArrayList<>();
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[] {10})), false));
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(new Integer[] {20})), false));
-        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.BOOLEAN, Collections.emptyList()), false));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(10))));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
+        columns.add(new Column(new Identifier("whatever"), SQLDataTypeFactory.getInstance(SQLDataType.BOOLEAN, Collections.emptyList())));
 
         when(systemDictionaryMock.getTableColumnsAsList(tableName)).thenReturn(columns);
 

@@ -39,7 +39,7 @@ public class FloatValue extends DataTypeValue {
     }
 
     @Override
-    public int length() {
+    public int byteLength() {
         return 4;
     }
 
@@ -55,9 +55,8 @@ public class FloatValue extends DataTypeValue {
 
         FloatValue that = (FloatValue) o;
 
-        if (Float.compare(that.value, value) != 0) return false;
+        return Float.compare(that.value, value) == 0;
 
-        return true;
     }
 
     @Override

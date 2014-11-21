@@ -20,7 +20,7 @@ public class TokenizerTest {
 
     @Test
     public void testPeekBeforeNext() {
-        SimpleTokenizer t = new SimpleTokenizer("SELECT columnA , columnB FROM tableX");
+        Tokenizer t = new SimpleTokenizer("SELECT columnA , columnB FROM tableX");
         assertEquals("SELECT", t.peek());
         assertEquals("SELECT", t.next());
     }
@@ -33,7 +33,7 @@ public class TokenizerTest {
 
     @Test
     public void peekMayBeCalledAnyTimes() {
-        SimpleTokenizer t = new SimpleTokenizer("SELECT columnA , columnB FROM tableX");
+        Tokenizer t = new SimpleTokenizer("SELECT columnA , columnB FROM tableX");
         assertEquals("SELECT", t.peek());
         assertEquals("SELECT", t.peek());
 

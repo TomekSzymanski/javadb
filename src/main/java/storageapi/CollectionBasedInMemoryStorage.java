@@ -1,10 +1,7 @@
-package discstorage;
+package storageapi;
 
-import datamodel.DataTypeValue;
 import datamodel.Identifier;
 import org.apache.commons.lang3.Validate;
-import storageapi.DataStoreException;
-import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
 import java.util.*;
@@ -14,13 +11,13 @@ import java.util.*;
  */
 public class CollectionBasedInMemoryStorage implements Storage {
 
-    private final Map<Identifier, List<List<DataTypeValue>>> tablesRecords = new HashMap<>();
+    private final Map<Identifier, List<Record>> tablesRecords = new HashMap<>();
 
     private static CollectionBasedInMemoryStorage INSTANCE;
 
     private CollectionBasedInMemoryStorage(){}
 
-    public static CollectionBasedInMemoryStorage getInstance() {
+    public static Storage getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new CollectionBasedInMemoryStorage();
         }
@@ -43,24 +40,15 @@ public class CollectionBasedInMemoryStorage implements Storage {
     }
 
     @Override
-    public void insertRecord(Identifier tableName, List<DataTypeValue> recordValues) throws DataStoreException {
+    public void insertRecord(Identifier tableName, Record recordValues) throws DataStoreException {
         if (!tablesRecords.containsKey(tableName)) {
             throw new DataStoreException("Table " + tableName + " does not exist");
         }
         tablesRecords.get(tableName).add(recordValues);
     }
 
-    //@Override
-    public List<List<DataTypeValue>> getAllRecords(Identifier tableName) throws DataStoreException {
-        List<List<DataTypeValue>> records = new ArrayList<>();
-        if (tablesRecords.containsKey(tableName)) {
-            records = tablesRecords.get(tableName);
-        }
-        return records;
-    }
-
     @Override
-    public Iterator<List<DataTypeValue>> tableIterator(Identifier tableName) throws DataStoreException {
+    public Iterator<Record> tableIterator(Identifier tableName) throws DataStoreException {
         return tablesRecords.get(tableName).iterator();
     }
 

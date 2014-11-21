@@ -2,7 +2,7 @@ package executors;
 
 import clientapi.ResultSet;
 import clientapi.SQLException;
-import datamodel.DataTypeValue;
+import storageapi.Record;
 
 import java.util.Iterator;
 import java.util.List;
@@ -10,10 +10,10 @@ import java.util.List;
 /**
  * Created on 2014-10-23.
  */
-public class IteratorBasedResultSet<E extends DataTypeValue> implements ResultSet {
+public class IteratorBasedResultSet implements ResultSet {
 
-    private Iterator<List<E>> queryResultIterator;
-    private List<E> currentQueryResultRecord;
+    private Iterator<Record> queryResultIterator;
+    private Record currentQueryResultRecord;
     private List<String> columnLabels;
 
     /* On construction this result set will prefetch this number of rows from storage */
@@ -22,15 +22,15 @@ public class IteratorBasedResultSet<E extends DataTypeValue> implements ResultSe
     /* default number of rows that will be fetched from storage by this ResultSet when next() is called, and all prefetched rows have been already iterated */
     private static final int DEFAULT_NEXT_FETCH_SIZE = 20;
 
-    public IteratorBasedResultSet(Iterator<List<E>> queryResultIterator,
+    public IteratorBasedResultSet(Iterator<Record> queryResultIterator,
                            List<String> columnLabels,
                            ExecutionContext context) {
         int nextFetchSize = (context!=null && (context.nextFetchSize != 0))?  context.nextFetchSize : DEFAULT_NEXT_FETCH_SIZE;
-        this.queryResultIterator = new PrefetchingIterator(queryResultIterator, INITIAL_FETCH_SIZE, nextFetchSize);
+        this.queryResultIterator = new PrefetchingIterator<>(queryResultIterator, INITIAL_FETCH_SIZE, nextFetchSize);
         this.columnLabels = columnLabels;
     }
 
-    public IteratorBasedResultSet(Iterator<List<E>> queryResultIterator, // TODO public only for metadata collection - move metadata collection logic from clientapi
+    public IteratorBasedResultSet(Iterator<Record> queryResultIterator, // TODO public only for metadata collection - move metadata collection logic from clientapi
                            List<String> columnLabels) {
         this(queryResultIterator, columnLabels, null);
     }

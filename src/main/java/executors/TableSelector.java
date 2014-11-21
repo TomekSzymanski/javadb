@@ -1,9 +1,9 @@
 package executors;
 
 import clientapi.ResultSet;
-import datamodel.DataTypeValue;
 import datamodel.Identifier;
-import discstorage.CollectionBasedInMemoryStorage;
+import storageapi.CollectionBasedInMemoryStorage;
+import storageapi.Record;
 import storageapi.Storage;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 class TableSelector implements QueryAssembly {
 
     private static Storage storage = CollectionBasedInMemoryStorage.getInstance();
-    private Iterator<List<DataTypeValue>> tableIterator;
+    private Iterator<Record> tableIterator;
     private List<String> columnLabels = new ArrayList<>();
 
     private ExecutionContext context;
@@ -30,6 +30,6 @@ class TableSelector implements QueryAssembly {
 
     @Override
     public ResultSet getResultSet() {
-        return new IteratorBasedResultSet<>(tableIterator, columnLabels, context);
+        return new IteratorBasedResultSet(tableIterator, columnLabels, context);
     }
 }

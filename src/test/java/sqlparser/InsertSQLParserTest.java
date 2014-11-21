@@ -13,7 +13,7 @@ public class InsertSQLParserTest {
     @Test
     public void simpleInsertNoColumnSpecification() throws SQLParseException {
         InsertSQLParser parser = new InsertSQLParser ();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "VALUES", "(", "100", ")"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "VALUES", "(", "100", ")"});
         InsertCommand ast = parser.parse(tokens);
 
         assertEquals("payouts", ast.getTableName().getValue());
@@ -27,7 +27,7 @@ public class InsertSQLParserTest {
     @Test
     public void simpleInsertWithColumnSpecification() throws SQLParseException {
         InsertSQLParser parser = new InsertSQLParser();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "(", "value", ")", "VALUES", "(", "100", ")"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "(", "value", ")", "VALUES", "(", "100", ")"});
         InsertCommand ast = parser.parse(tokens);
 
         assertEquals("payouts", ast.getTableName().getValue());
@@ -43,7 +43,7 @@ public class InsertSQLParserTest {
     @Test (expected = SQLParseException.class)
     public void missingParenAroundColumns() throws SQLParseException {
         InsertSQLParser parser = new InsertSQLParser();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "value", ")", "VALUES", "(", "100", ")"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "value", ")", "VALUES", "(", "100", ")"});
         parser.parse(tokens);
     }
 
@@ -51,7 +51,7 @@ public class InsertSQLParserTest {
     @Test (expected = SQLParseException.class)
     public void missingParenAroundValues() throws SQLParseException {
         InsertSQLParser parser = new InsertSQLParser();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "(", "value", ")", "VALUES", "100", ")"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"INSERT", "INTO", "payouts", "(", "value", ")", "VALUES", "100", ")"});
         parser.parse(tokens);
     }
 

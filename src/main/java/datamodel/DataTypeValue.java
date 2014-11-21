@@ -23,7 +23,7 @@ public abstract class DataTypeValue {
      *
      * @return
      */
-    public abstract int length();
+    public abstract int byteLength();
 
     public abstract DataTypeValue valueOf(String s);
 

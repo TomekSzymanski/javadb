@@ -14,7 +14,7 @@ public class SQLDataTypeFactoryTest {
 
     @Test
     public void createNumberDataTypeWithPrecisionAndScale() {
-        SQLDataType type = SQLDataTypeFactory.getInstance("NUMBER", Arrays.asList(new Integer[] {8,2}));
+        SQLDataType type = SQLDataTypeFactory.getInstance("NUMBER", Arrays.asList(8,2));
         assertEquals(SQLNumberDataType.class, type.getClass());
         assertEquals(8, type.getFieldSizeSpecifier(0));
         assertEquals(2, type.getFieldSizeSpecifier(1));

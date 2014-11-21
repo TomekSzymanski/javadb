@@ -6,12 +6,12 @@ import datamodel.Identifier;
 import datamodel.NullValue;
 import datamodel.SQLDataType;
 import sqlparser.InsertCommand;
+import storageapi.Record;
 import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -39,19 +39,19 @@ class InsertExecutor implements CommandExecutor<InsertCommand> {
         List<String> valuesSpecifiedInINSERT = command.getValues();
 
         // 1. verify each column provided in INSERT column specification exists in the table to insert data
-        ArrayList<Identifier> invalidColumns = new ArrayList<>(columnsSpecifiedInINSERT);
+        List<Identifier> invalidColumns = new ArrayList<>(columnsSpecifiedInINSERT);
         invalidColumns.removeAll(tableColumnNamesList);
         if (!invalidColumns.isEmpty()) {
             throw new SQLException("Table " + tableName + " does not contain columns " + invalidColumns);
         }
 
-        List<DataTypeValue> valuesOfRecordToInsert = new LinkedList<>();
+        Record valuesOfRecordToInsert = new Record();
 
-        if (columnsSpecifiedInINSERT.size() > 0)  { // column list specified
+        if (!columnsSpecifiedInINSERT.isEmpty())  { // column list specified
 
             // check if all NOT NULL columns have been specified
             tableColumnNamesList.stream()
-                    .filter(column -> dictionary.getColumnInfo(tableName, column).isNotNull)
+                    .filter(column -> !dictionary.getColumnInfo(tableName, column).isNullable())
                     .filter(column -> !columnsSpecifiedInINSERT.contains(column))
                     .findFirst().ifPresent(column -> {throw new SQLException("Not null column " + column + " not specified in the INTO column specification clause");});
 

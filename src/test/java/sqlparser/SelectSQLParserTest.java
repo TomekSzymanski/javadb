@@ -12,7 +12,7 @@ public class SelectSQLParserTest {
     @Test
     public void simplestSelectAsterisk() throws SQLParseException {
         SelectSQLParser parser = new SelectSQLParser();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"SELECT", "*", "FROM", "TABLE1"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"SELECT", "*", "FROM", "TABLE1"});
         SelectCommand ast = parser.parse(tokens);
 
         assertEquals(1, ast.getSelectList().size());
@@ -25,7 +25,7 @@ public class SelectSQLParserTest {
     @Test
          public void simplestSelectColumnList() throws SQLParseException {
         SelectSQLParser parser = new SelectSQLParser();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"SELECT", "column1", ",", "column2", "FROM", "TABLE1"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"SELECT", "column1", ",", "column2", "FROM", "TABLE1"});
         SelectCommand ast = parser.parse(tokens);
 
         assertEquals(2, ast.getSelectList().size());
@@ -39,7 +39,7 @@ public class SelectSQLParserTest {
     @Test (expected = SQLParseException.class)
     public void simplestSelectColumnListMissingComma() throws SQLParseException {
         SelectSQLParser parser = new SelectSQLParser();
-        TokenizerMock tokens = new TokenizerMock(new String[]{"SELECT", "column1", /*missing comma*/ "column2", "FROM", "TABLE1"});
+        Tokenizer tokens = new TokenizerMock(new String[]{"SELECT", "column1", /*missing comma*/ "column2", "FROM", "TABLE1"});
         parser.parse(tokens);
     }
 }

@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class SQLParserImpl {
 
-    private final static Map<String, SQLParser> sqlCommandParsersMap = initializeParserInstancesMap(); //TODO map from String ... nice?
+    private static final Map<String, SQLParser> sqlCommandParsersMap = initializeParserInstancesMap(); //TODO map from String ... nice?
 
     private static Map<String, SQLParser> initializeParserInstancesMap() {
         Map<String, SQLParser> parserInstancesMap = new HashMap<>();
@@ -28,8 +28,13 @@ public class SQLParserImpl {
         return parser.parse(sql);
     }
 
+    public SelectCommand parseQuery(String selectSql) throws SQLParseException {
+        SQLParser parser = getParser(selectSql);
+        return (SelectCommand)parser.parse(selectSql);
+    }
+
     private static SQLParser getParser(String input) throws SQLParseException {
-        SimpleTokenizer tokenizer = new SimpleTokenizer(input);
+        Tokenizer tokenizer = new SimpleTokenizer(input);
         String next = tokenizer.peek();
         SQLParser parser = sqlCommandParsersMap.get(next.toUpperCase());
         Validate.notNull(parser, "Unrecognized SQL command starting with: \"%s\"", next);

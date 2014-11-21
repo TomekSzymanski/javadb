@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static datamodel.Column.Nullable.ISNOTNULL;
+import static datamodel.Column.Nullable.NULLABLE;
+
 /**
  * Parses CREATE TABLE SQL statements, according to subset of SQL 99 specification.
  *
@@ -89,15 +92,15 @@ class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
 
             SQLDataType columnDataType = SQLDataTypeFactory.getInstance(dataTypeString, fieldSizeSpecifiers);
 
-            boolean isNotNull = false;
+            Column.Nullable isNullable = NULLABLE;
             // now we can meet only constraints specification
             if (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase(NOT)) {
                 tokenizer.next(); // consume NOT
                 expect(tokenizer, NULL, "NOT keyword in NOT NULL constraint not followed by NULL keyword");
-                isNotNull = true;
+                isNullable = ISNOTNULL;
             }
 
-            ast.addColumnInfo(new Column(columnName, columnDataType, isNotNull));
+            ast.addColumnInfo(new Column(columnName, columnDataType, isNullable));
 
             // if there are more elements it means that we have another column specification to parse
             // consume the comma

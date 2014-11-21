@@ -30,6 +30,6 @@ public class Connection implements AutoCloseable {
      * @throws Exception
      */
     @Override
-    public void close() throws Exception {
+    public void close() throws SQLException {
     }
 }

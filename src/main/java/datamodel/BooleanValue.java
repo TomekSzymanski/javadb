@@ -16,8 +16,8 @@ public class BooleanValue extends DataTypeValue {
     public static final BooleanValue TRUE = new BooleanValue(true);
     public static final BooleanValue FALSE = new BooleanValue(false);
 
-    public static final BooleanValue valueOf(boolean arg) {
-        return arg? TRUE : FALSE;
+    public static BooleanValue valueOf(boolean value) {
+        return value? TRUE : FALSE;
     }
 
     @Override
@@ -27,9 +27,8 @@ public class BooleanValue extends DataTypeValue {
 
         BooleanValue that = (BooleanValue) o;
 
-        if (value != that.value) return false;
+        return value == that.value;
 
-        return true;
     }
 
     @Override
@@ -64,7 +63,7 @@ public class BooleanValue extends DataTypeValue {
     }
 
     @Override
-    public int length() {
+    public int byteLength() {
         return 1;
     }
 
