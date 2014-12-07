@@ -13,6 +13,7 @@ import systemdictionary.SystemDictionary;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created on 2014-10-23.
@@ -20,7 +21,7 @@ import java.util.List;
 class InsertExecutor implements CommandExecutor<InsertCommand> {
 
     private Storage storage;
-    private SystemDictionary dictionary;
+    private SystemDictionary dictionary; //TODO enough to have in many places only view on dictionary (unmodifiable)
 
     InsertExecutor(Storage storage, SystemDictionary dictionary) {
         this.storage = storage;
@@ -28,58 +29,87 @@ class InsertExecutor implements CommandExecutor<InsertCommand> {
     }
 
     @Override
-    // TODO extract short methods
     public void execute(InsertCommand command)  {
         Identifier tableName = command.getTableName();
+
         if (!dictionary.tableExists(tableName)) {
             throw new SQLException("Trying to insert to non existent table " + tableName);
         }
-        Collection<Identifier> tableColumnNamesList = dictionary.getTableColumnNames(tableName);
-        List<Identifier> columnsSpecifiedInINSERT = command.getColumnList();
-        List<String> valuesSpecifiedInINSERT = command.getValues();
 
-        // 1. verify each column provided in INSERT column specification exists in the table to insert data
-        List<Identifier> invalidColumns = new ArrayList<>(columnsSpecifiedInINSERT);
-        invalidColumns.removeAll(tableColumnNamesList);
+        List<Identifier> columnsSpecifiedInInsert = command.getColumnList();
+        List<String> valuesSpecifiedInInsert = command.getValues();
+
+        Record valuesOfRecordToInsert;
+
+        if (!columnsSpecifiedInInsert.isEmpty())  { // column list specified
+            /* 1. verify each column provided in INSERT column specification exists in the table to insert data */
+            validateAllColumnsExistInTable(tableName, columnsSpecifiedInInsert);
+
+            /* 2. check if all NOT NULL columns have been specified */
+            validateAllNotNullColumnsSpecified(tableName, columnsSpecifiedInInsert);
+
+            valuesOfRecordToInsert = createRecordValues(tableName, valuesSpecifiedInInsert, columnsSpecifiedInInsert);
+
+        } else { // column list not specified, process value list along with column order in system dictionary
+            // check if number of values provided equals number of columns of the table
+            validateAllColumnsSpecified(tableName, valuesSpecifiedInInsert);
+
+            valuesOfRecordToInsert = createRecordValues(tableName, valuesSpecifiedInInsert);
+
+        }
+        storage.insertRecord(tableName, valuesOfRecordToInsert);
+    }
+
+    private Record createRecordValues(Identifier tableName, List<String> valuesSpecifiedInInsert, List<Identifier> columnsSpecifiedInInsert) {
+        Record recordValues = new Record();
+        Collection<Identifier> tableColumnNamesList = dictionary.getTableColumnNames(tableName);
+        for (Identifier column : tableColumnNamesList) {
+            if (columnsSpecifiedInInsert.contains(column)) { // column was specified in insert list
+                int position = columnsSpecifiedInInsert.indexOf(column);
+                SQLDataType columnDataTypeFactory = dictionary.getColumnInfo(tableName, column).dataType;
+                DataTypeValue value = columnDataTypeFactory.valueOf(valuesSpecifiedInInsert.get(position));
+                recordValues.add(value);
+            } else { // column not specified in insert list, but it is nullable columns (ckecked earlier) so we insert NULL value
+                recordValues.add(NullValue.NULL);
+            }
+        }
+        return recordValues;
+    }
+
+    private Record createRecordValues(Identifier tableName, List<String> valuesSpecifiedInInsert) {
+        Record recordValues = new Record();
+        int columnIndex = 0;
+        for (String stringValue : valuesSpecifiedInInsert) {
+            SQLDataType columnDataTypeFactory = dictionary.getColumnInfo(tableName, columnIndex++).dataType;
+            DataTypeValue value = columnDataTypeFactory.valueOf(stringValue);
+            recordValues.add(value);
+        }
+        return recordValues;
+    }
+
+    private void validateAllColumnsSpecified(Identifier tableName, List<String> valuesSpecifiedInInsert) {
+        int numberOfColumnsInTable = dictionary.getTableColumnNames(tableName).size();
+        if (valuesSpecifiedInInsert.size() != numberOfColumnsInTable) {
+            throw new SQLException("Number of values specified in INSERT does not match number of columns of the table " + tableName + ". Need to specify " + numberOfColumnsInTable + " values");
+        }
+    }
+
+    private void validateAllNotNullColumnsSpecified(Identifier tableName, List<Identifier> columnsSpecifiedInInsert) {
+        List<Identifier> notSpecifiedNotNullColumns = dictionary.getTableColumnNames(tableName).stream()
+                .filter(column -> !dictionary.getColumnInfo(tableName, column).isNullable())
+                .filter(column -> !columnsSpecifiedInInsert.contains(column)).collect(Collectors.toList());
+        if (!notSpecifiedNotNullColumns.isEmpty()) {
+            throw new SQLException("Not null columns " + notSpecifiedNotNullColumns + " not specified in column specification clause");
+        }
+    }
+
+    private void validateAllColumnsExistInTable(Identifier tableName, List<Identifier> columnsSpecifiedInInsert) {
+        List<Identifier> invalidColumns = new ArrayList<>(columnsSpecifiedInInsert);
+        invalidColumns.removeAll(dictionary.getTableColumnNames(tableName));
         if (!invalidColumns.isEmpty()) {
             throw new SQLException("Table " + tableName + " does not contain columns " + invalidColumns);
         }
-
-        Record valuesOfRecordToInsert = new Record();
-
-        if (!columnsSpecifiedInINSERT.isEmpty())  { // column list specified
-
-            // check if all NOT NULL columns have been specified
-            tableColumnNamesList.stream()
-                    .filter(column -> !dictionary.getColumnInfo(tableName, column).isNullable())
-                    .filter(column -> !columnsSpecifiedInINSERT.contains(column))
-                    .findFirst().ifPresent(column -> {throw new SQLException("Not null column " + column + " not specified in the INTO column specification clause");});
-
-            for (Identifier column : tableColumnNamesList) {
-                // column was specified in insert list
-                if (columnsSpecifiedInINSERT.contains(column)) {
-                    int position = columnsSpecifiedInINSERT.indexOf(column);
-                    SQLDataType columnDataType = dictionary.getColumnInfo(tableName, column).dataType;
-                    DataTypeValue value = columnDataType.valueOf(valuesSpecifiedInINSERT.get(position));
-                    valuesOfRecordToInsert.add(value);
-                } else { // column not specified in insert list, but it is nullable columns so we insert SQL null value
-                    valuesOfRecordToInsert.add(NullValue.NULL);
-                }
-            }
-        } else { // column list not specified, process value list along with column order in system dictionary
-            // check if number of values provided equals number of columns of the table
-            if (valuesSpecifiedInINSERT.size() != tableColumnNamesList.size()) {
-                throw new SQLException("Number of values specified in INSERT does not match number of columns in the table " + tableName);
-            }
-            int columnIndex = 0;
-            for (String stringValue : valuesSpecifiedInINSERT) {
-                SQLDataType columnDataType = dictionary.getColumnInfo(tableName, columnIndex++).dataType;
-                DataTypeValue value = columnDataType.valueOf(stringValue);
-                valuesOfRecordToInsert.add(value);
-            }
-        }
-        storage.insertRecord(tableName, valuesOfRecordToInsert);
-
     }
+
 
 }

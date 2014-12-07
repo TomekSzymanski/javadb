@@ -26,6 +26,8 @@ class PageRegistry {
 
     private static PageRegistry INSTANCE;
 
+    private PageLoader pageLoader;
+
     public static PageRegistry getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException("Trying to use not initialized Page Registry");
@@ -33,13 +35,13 @@ class PageRegistry {
         return INSTANCE;
     }
 
-    public static PageRegistry loadFromDisk(File pageRegistryFile, SystemDictionary systemDictionary) {
+    public static PageRegistry loadFromDisk(File pageRegistryFile, SystemDictionary systemDictionary, PageLoader loader) {
         if (INSTANCE != null) {
             throw new IllegalStateException("Trying to initialized PageRegistry which is already initialized");
         }
 
         if (pageRegistryFile.length() == 0) { // new database created, have to initialize itself as empty registry
-            INSTANCE = new PageRegistry(systemDictionary);
+            INSTANCE = new PageRegistry(systemDictionary, loader);
         } else { // registry file not empty -> boot itself from that file
             try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(pageRegistryFile))) {
                 INSTANCE = (PageRegistry) input.readObject();
@@ -50,14 +52,15 @@ class PageRegistry {
         return INSTANCE;
     }
 
-    private PageRegistry(SystemDictionary systemDictionary) {
+    private PageRegistry(SystemDictionary systemDictionary, PageLoader pageLoader) {
         PageRegistry.systemDictionary = systemDictionary;
+        this.pageLoader = pageLoader;
         initializeEmptyRegistry();
     }
 
     private void initializeEmptyRegistry() {
         for (int i = 0; i < NUM_PAGES; i++) {
-            allPages.add(new Page(i, null, systemDictionary));
+            allPages.add(new Page(i, null, pageLoader, systemDictionary));
         }
     }
 

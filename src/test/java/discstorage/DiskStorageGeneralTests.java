@@ -2,6 +2,7 @@ package discstorage;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import storageapi.Storage;
 import storageapi.StorageGeneralTest;
 
@@ -13,12 +14,12 @@ import java.io.File;
 public class DiskStorageGeneralTests extends StorageGeneralTest {
 
     private static String testDiskDBDirectoryString = "tmp_database_for_unit_tests";
+    private static Storage pageBasedStorage;
 
-    static {
-        PageBasedStorage.createDatabaseOnDisk(testDiskDBDirectoryString); // TODO: remove dependency on hard drive
+    @BeforeClass
+    public static void setUp() {
+        pageBasedStorage = PageBasedStorage.createDatabaseOnDisk(testDiskDBDirectoryString); // TODO: remove dependency on hard drive
     }
-
-    private static Storage pageBasedStorage = PageBasedStorage.getInstance(); // TODO: do we need another factory method (3rd one?)
 
     @Override
     protected Storage initializeStorage() {

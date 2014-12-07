@@ -20,5 +20,25 @@ public interface Storage {
 
     void deleteAll(Identifier tableName);
 
+
+
+
+    /**
+     * Returns system dictionary instance that is collaborating with this storgae instance.
+     * If storage is persistent then it is storage resposibility to load dictionary from persistence.
+     * JavaDB assumes the dictionary instance will be one and the same instance.
+     * @return // TODO maybe InputStream getSystemDictionary() and writeSystemDictionary(OutputStream) would also do?
+     */
     SystemDictionary getSystemDictionary();
+
+    /**
+     * If storage is not persistent than this one does not need to be implemented. If Storage is persistent then it must be implemented
+     * @param dictionary
+     * @throws DataStoreException
+     */
+    default void writeSystemDictionary(SystemDictionary dictionary) throws DataStoreException {
+        // intentionally blank.
+    }
+
+    void close();
 }

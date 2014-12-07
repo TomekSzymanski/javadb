@@ -3,6 +3,7 @@ package executors;
 import datamodel.Identifier;
 import sqlparser.AbstractSQLParser;
 import sqlparser.SelectCommand;
+import storageapi.Storage;
 import systemdictionary.SystemDictionary;
 
 import java.util.List;
@@ -13,13 +14,16 @@ import java.util.stream.Collectors;
  */
 class QueryAssemblyFactory {
 
-    private static SystemDictionary dictionary = SystemDictionary.getInstance();
+    private static SystemDictionary dictionary;
+    private static Storage storage;
 
-    static QueryAssembly getInstance(SelectCommand selectSQLCommand, ExecutionContext context) {
+    static QueryAssembly getInstance(Storage storage, SelectCommand selectSQLCommand, ExecutionContext context) {
+        QueryAssemblyFactory.storage = storage;
+        QueryAssemblyFactory.dictionary = storage.getSystemDictionary();
         Identifier tableName = selectSQLCommand.getTableList().get(0);
         List<String> selectListElements = selectSQLCommand.getSelectList();
         List<Identifier> columnExpandedList = expandAsteriskIntoColumns(tableName, selectListElements);
-        return new TableSelector(tableName, columnExpandedList, context);
+        return new TableSelector(storage, tableName, columnExpandedList, context);
     }
 
     private static List<Identifier> expandAsteriskIntoColumns(Identifier tableName, List<String> columnList) {

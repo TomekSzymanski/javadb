@@ -9,23 +9,14 @@ import java.io.*;
  */
 public class DiskLoader implements PageLoader {
 
-    private static DiskLoader INSTANCE;
-
     private final RandomAccessFile dataFile;
 
-    public static PageLoader createNewLoader(File pageDataFile) {
-        if (INSTANCE != null) {
-            throw new IllegalStateException("Trying to initialize already initialized loader");
+    DiskLoader(File pageDataFile) {
+        try {
+            dataFile = new RandomAccessFile(pageDataFile, "rw"); // TODO: later consider rws/rwd mode (guarantee of synchronous write to disk)
+        } catch (IOException e) {
+            throw new DataStoreException(e);
         }
-        INSTANCE = new DiskLoader(pageDataFile);
-        return INSTANCE;
-    }
-
-    public static PageLoader getInstance() {
-        if (INSTANCE == null) {
-            throw new IllegalStateException("Trying to use not initialized loader");
-        }
-        return INSTANCE;
     }
 
     @Override
@@ -81,12 +72,8 @@ public class DiskLoader implements PageLoader {
         return 1000 + pageId * Page.PAGE_SIZE + 1;
     }
 
-    private DiskLoader(File pageDataFile) {
-        try {
-            dataFile = new RandomAccessFile(pageDataFile, "rw"); // TODO: later consider rws/rwd mode (guarantee of synchronous write to disk)
-        } catch (IOException e) {
-            throw new DataStoreException(e);
-        }
+    void close() throws IOException {
+        dataFile.close();
     }
 
 }

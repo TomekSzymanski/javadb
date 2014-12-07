@@ -11,7 +11,7 @@ import java.io.File;
 public class DiskLoaderTest extends PageLoaderTest {
 
     private static final File testDataFile = new File("someTestDataFile");
-    private static final PageLoader loader = DiskLoader.createNewLoader(testDataFile);
+    private static final PageLoader loader = new DiskLoader(testDataFile);
 
     @Override
     protected PageLoader getLoaderInstance() {

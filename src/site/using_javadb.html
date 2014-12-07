@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Using javaDB</title>
+</head>
+<body>
+<h3>Database creation API</h3>
+<ol>
+    <li>Creating and opening new in-memory database:<br>
+    JavaDB database = new DatabaseBuilder().newInMemoryDatabase().build();<br>
+    You can also configure max memory for database://TODO
+    JavaDB database = new DatabaseBuilder().newInMemoryDatabase().maxMemory(200).build();<br> // in Megabytes
+<!--        new DatabaseBuilder().newInMemoryDatabase(). (here go mandatory setter/properties calls, like .maxMemory(100, MemoryUnit.MB) and build() method will verify if all necessary options were passed. Or pass them in newInMemoryDatabase(maxDBSize, UnitsEnum unit)
+        // memory unit like this one: http://ehcache.org/apidocs/2.9/net/sf/ehcache/config/MemoryUnit.html-->
+    // usage
+    Connection connection = database.getConnection();
+
+    <li>Creating and opening new DB on disk:<br>
+    Here we have to pass along also configuration optins (like directory where to put the DB):
+    JavaDB database = new DatabaseBuilder().newDiskDatabase(String diskLocation).build();
+    JavaDB database = new DatabaseBuilder().newDiskDatabase(String diskLocation).maxDBSize(200).build(); // max size in megabytes
+
+    <li>Opening existing DB from disk:<br>
+    JavaDB database = new DatabaseBuilder().openDatabaseFromDisk(String diskLocation).build();
+    // additional options:
+    JavaDB database = new DatabaseBuilder().openDatabaseFromDisk().readOnly().build();
+
+    <li>Creating new database, or opening existing database , using the storage provided by the user (3rd party storage):<br>
+    Storage 3rdPartyStorage = // initialize and configure your storage instance
+    JavaDB database = new DatabaseBuilder().createOrOpenDatabase(3rdPartyStorage).build();
+
+    Whether the 3rd party storgae is persistent or not is implementation decision. JavaDB will be sending all objects to be persisted.
+
+    // when database is closed, the close() method will be called on storage. Put there all your finalization logic
+    database.close();
+</ol>
+
+<h3>Storage interfaces</h3>
+
+All comunication to storage happens thru Storage interface.
+All javaDB code depends, as client, on package storageapi (which contains also the Storage interface).
+<br>
+Difficulties:
+<ul>
+<!--    <li>javaDB, when it is persistent one (for example disk storage) must read system dictionary from disk. Should Storage have method getSystemDictionary(). No.
+    Export methods: void writeObject(K key, Object object), Object readObject(K key). Persisted objects must be Serializable.
+    <br>When new persistent database is created then builder method will call Storage like:<br>
+        PersistentStorage persistentStorageInstance = new ...;
+        persistentStorageInstance.writeObject(new Key("SystemDictionary"), new SystemDicitonary()); // SystemDictionary.createEmpty() or similar
+        Upon every change in distioanty it will be saved to storage by calling the same above method.
+    </li>
+
+    <li>
+        when it is not persistent instance, no need for writeObject, readObject methods
+    </li>
+    -->
+
+</ul>
+</body>
+</html>

@@ -1,9 +1,6 @@
 package integrationtests;
 
-import clientapi.Connection;
-import clientapi.ResultSet;
-import clientapi.SQLException;
-import clientapi.Statement;
+import clientapi.*;
 import org.junit.*;
 
 import static junit.framework.TestCase.assertFalse;
@@ -17,7 +14,8 @@ public class SimpleInsertAndSelectAllColumnsTest extends IntegrationTestsBase {
 
     private final static String TEST_TABLE_NAME = SimpleInsertAndSelectAllColumnsTest.class.getSimpleName() + "_customers";
 
-    private static final Connection connection = new Connection();
+    private static JavaDB database = new DatabaseBuilder().newInMemoryDatabase().build();
+    private static Connection connection = database.getConnection();
     private static Statement statement;
 
     @Before
@@ -130,8 +128,13 @@ public class SimpleInsertAndSelectAllColumnsTest extends IntegrationTestsBase {
 
 
     @After
-    public void tearDown() throws SQLException {
+    public void dropTable() throws SQLException {
         dropTestTable(connection, TEST_TABLE_NAME);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        database.close();
     }
 
 }

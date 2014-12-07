@@ -1,8 +1,10 @@
 package integrationtests;
 
 import clientapi.Connection;
+import clientapi.DatabaseBuilder;
+import clientapi.JavaDB;
 import clientapi.Statement;
-import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -14,20 +16,18 @@ import static org.junit.Assert.*;
  */
 public class CreateInsertAndDeleteAllTest extends IntegrationTestsBase {
 
-    private static Connection c = new Connection();
-    private static Statement stmt;
+    private static JavaDB database = new DatabaseBuilder().newInMemoryDatabase().build();
+    private static Connection c = database.getConnection();
     private static final String TEST_TABLE_NAME = "CreateInsertAndDeleteAllTest";
 
-    @BeforeClass
-    public static void setUp() {
-        stmt = c.createStatement();
-    }
 
     @Test
     public void testInsertAndDeleteAll() throws SQLException {
         // given
         try {
             createTestTable(c, TEST_TABLE_NAME, "CREATE TABLE " + TEST_TABLE_NAME + " (a NUMBER NOT NULL, b NUMBER)");
+
+            Statement stmt = c.createStatement();
 
             // when you specify INSERT not specifying nullable column
             stmt.execute("INSERT INTO " + TEST_TABLE_NAME + " (a) VALUES (1)");
@@ -56,6 +56,11 @@ public class CreateInsertAndDeleteAllTest extends IntegrationTestsBase {
             // tear down
             dropTestTable(c, TEST_TABLE_NAME);
         }
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        database.close();
     }
 
 }

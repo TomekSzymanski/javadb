@@ -161,7 +161,7 @@ public abstract class StorageGeneralTest {
         table.addColumn(new Column(new Identifier("whatever7"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20, 20)))); // null
         table.addColumn(new Column(new Identifier("whatever8"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(20))));
         table.addColumn(new Column(new Identifier("whatever9"), SQLDataTypeFactory.getInstance(SQLDataType.VARCHAR, Arrays.asList(20))));
-        // table.addColumn(new Column(new Identifier("whatever6"), SQLDataTypeFactory.getInstance(SQLDataType.NUMBER, Arrays.asList(new Integer[]{20, 20})), false)); TODO handle floats
+        // table.addColumn(new Column(new Identifier("whatever6"), SQLDataTypeFactory.newInstanceFromDisk(SQLDataType.NUMBER, Arrays.asList(new Integer[]{20, 20})), false)); TODO handle floats
         systemDictionary.registerTable(table);
 
 

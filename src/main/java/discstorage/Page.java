@@ -55,14 +55,6 @@ class Page implements Serializable {
         this(pageId, owningEntityId, new ArrayList<>(), loader, systemDictionary);
     }
 
-    Page(int pageId, Identifier owningEntityId, SystemDictionary systemDictionary) {
-        this(pageId, owningEntityId, null,DiskLoader.getInstance(), systemDictionary );
-    }
-
-    Page(int pageId, Identifier owningEntityId, List<Record> records, SystemDictionary systemDictionary) {
-        this(pageId, owningEntityId, records, DiskLoader.getInstance(), systemDictionary);
-    }
-
     // for unit tests
     Page(int pageId, Identifier owningEntityId, List<Record> records, PageLoader loader, SystemDictionary systemDictionary) {
         if (records!=null) {
@@ -223,32 +215,40 @@ class Page implements Serializable {
         // read record field types
         List<Column> columns = (List<Column>) is.readObject();
         int numberOfFields = columns.size();
-        int[] recordLengths = new int[numberOfFields];
 
         int totalRecordNumber = is.readInt();
 
         List<Record> allRecords = new ArrayList<>(numberOfFields);
+
         for (int i = 0; i < totalRecordNumber; i++) {
-            // read record lengths first
-            for (int j = 0; j < numberOfFields; j++) {
-                recordLengths[j] = is.readInt();
-            }
-            // read actual data
-            Record record = new Record();
-            for (int j = 0; j < numberOfFields; j++) {
-                DataTypeValue value;
-                if (recordLengths[j] == 0) { // null value
-                    value = NullValue.NULL;
-                } else {
-                    Column column = columns.get(j);
-                    SQLDataType dataValueFactory = column.dataType;
-                    value = dataValueFactory.readValue(is, recordLengths[j]); // TODO recordLengths[j] represent, but for varchar, the serializied lenght. nothing to do with
-                }
-                record.add(value);
-            }
-            allRecords.add(record);
+            allRecords.add(readRecord(is, columns));
         }
+
         records = allRecords;
+    }
+
+    private Record readRecord(ObjectInputStream is, List<Column> columns) throws IOException {
+        int numberOfFields = columns.size();
+        int[] recordLengths = new int[numberOfFields];
+
+        // read record lengths first
+        for (int j = 0; j < numberOfFields; j++) {
+            recordLengths[j] = is.readInt();
+        }
+        // read actual data
+        Record record = new Record();
+        for (int j = 0; j < numberOfFields; j++) {
+            DataTypeValue value;
+            if (recordLengths[j] == 0) { // null value
+                value = NullValue.NULL;
+            } else {
+                Column column = columns.get(j);
+                SQLDataType dataValueFactory = column.dataType;
+                value = dataValueFactory.readValue(is, recordLengths[j]); // TODO recordLengths[j] represent, but for varchar, the serializied lenght. nothing to do with
+            }
+            record.add(value);
+        }
+        return record;
     }
 
 }

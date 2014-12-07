@@ -7,12 +7,18 @@ import systemdictionary.SystemDictionary;
  */
 public class Connection implements AutoCloseable {
 
+    private JavaDB database;
+
+    Connection(JavaDB database) {
+        this.database = database;
+    };
+
     /**
      * Creates a Statement object for sending SQL statements to the database.
      * @return
      */
     public Statement createStatement() {
-        return new Statement();
+        return new Statement(database.getCommandExecutorFactory());
     }
 
     /**
@@ -21,7 +27,8 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      */
     public DatabaseMetaData getMetaData() {
-        return SystemDictionary.getInstance().getDatabaseMetaData();
+        SystemDictionary dictionary = database.getSystemDictionary();
+        return dictionary.getDatabaseMetaData();
     }
 
 

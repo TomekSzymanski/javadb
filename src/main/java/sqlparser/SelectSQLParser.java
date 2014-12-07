@@ -46,21 +46,19 @@ import java.util.List;
  */
 class SelectSQLParser extends AbstractSQLParser<SelectCommand> {
 
-    private SelectCommand ast;
-
     /*
        <SELECT_query> ::= 'SELECT' <SELECT_LIST> <TABLE_EXPRESSION>
      */
     SelectCommand parse(Tokenizer tokenizer) throws SQLParseException {
 
-        ast = new SelectCommand();
+        SelectCommand ast = new SelectCommand();
 
         expect(tokenizer, SELECT, "Select statement does not contain SELECT clause");
 
         List<String> columnList = createListFromAllTokensBefore(tokenizer, FROM);
-        parseSelectList(tokenizer, columnList);
+        parseSelectList(ast, tokenizer, columnList);
 
-        parseTableExpression(tokenizer);
+        parseTableExpression(ast, tokenizer);
 
         return ast;
     }
@@ -68,7 +66,7 @@ class SelectSQLParser extends AbstractSQLParser<SelectCommand> {
     /*
     <SELECT_LIST>  ::= <asterisk> | <identifier> | <quoted_string> [ { <comma> <identifier> | <quoted_string> }... ]
      */
-    private void parseSelectList(Tokenizer tokenizer, List<String> columnList) throws SQLParseException {
+    private void parseSelectList(SelectCommand ast, Tokenizer tokenizer, List<String> columnList) throws SQLParseException {
         if (columnList.isEmpty()) {
             throw new SQLParseException("No column list provided");
         }
@@ -83,11 +81,11 @@ class SelectSQLParser extends AbstractSQLParser<SelectCommand> {
     /*
     <TABLE_EXPRESSION> ::= <FROM_CLAUSE> [ <WHERE_CLAUSE> ]
     */
-    private void parseTableExpression(Tokenizer tokenizer) throws SQLParseException {
+    private void parseTableExpression(SelectCommand ast, Tokenizer tokenizer) throws SQLParseException {
         expect(tokenizer, FROM, "SELECT statement must contain FROM clause");
 
         List<String> fromList = createListFromAllTokensBefore(tokenizer, WHERE);
-        parseFromClause(fromList);
+        parseFromClause(ast, fromList);
 
         if (tokenizer.hasNext()) {
             parseWhereClause(tokenizer);
@@ -99,7 +97,7 @@ class SelectSQLParser extends AbstractSQLParser<SelectCommand> {
 
       <TABLE_REFERENCE_LIST> ::= <identifier> [ { <comma> <identifier> }... ]
     */
-    private void parseFromClause(List<String> tableList) throws SQLParseException {
+    private void parseFromClause(SelectCommand ast, List<String> tableList) throws SQLParseException {
         if (tableList.isEmpty()) {
             throw new SQLParseException("No table list provided");
         }

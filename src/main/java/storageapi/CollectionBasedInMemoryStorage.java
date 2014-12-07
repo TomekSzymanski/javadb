@@ -11,17 +11,14 @@ import java.util.*;
  */
 public class CollectionBasedInMemoryStorage implements Storage {
 
-    private final Map<Identifier, List<Record>> tablesRecords = new HashMap<>();
+    private SystemDictionary systemDictionaryInstance = SystemDictionary.createEmptyDictionary();
 
-    private static CollectionBasedInMemoryStorage INSTANCE;
+    private Map<Identifier, List<Record>> tablesRecords = new HashMap<>();
 
     private CollectionBasedInMemoryStorage(){}
 
-    public static Storage getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new CollectionBasedInMemoryStorage();
-        }
-        return INSTANCE;
+    public static Storage createNewStorage() {
+        return new CollectionBasedInMemoryStorage();
     }
 
     @Override
@@ -59,6 +56,12 @@ public class CollectionBasedInMemoryStorage implements Storage {
 
     @Override
     public SystemDictionary getSystemDictionary() {
-        return null; // TODO: implement returning instance of NON persistent dictionary
+        return systemDictionaryInstance;
     }
+
+    @Override
+    public void close() {
+        tablesRecords = null; // will throw NPE on calling other methods , when it is closed.
+    }
+
 }

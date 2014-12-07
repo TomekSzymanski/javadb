@@ -1,7 +1,7 @@
 package clientapi;
 
+import org.junit.AfterClass;
 import org.junit.Test;
-import systemdictionary.SystemDictionary;
 
 import static org.junit.Assert.*;
 
@@ -12,14 +12,13 @@ import static org.junit.Assert.*;
  */
 public class DatabaseMetaDataTest {
 
-    private static final SystemDictionary systemDictionary = SystemDictionary.createEmptyDictionary();
+    private static JavaDB database = new DatabaseBuilder().newInMemoryDatabase().build();
+    private static Connection c = database.getConnection();
 
     @Test
     public void getTablesByPattern() {
 
-        Connection c = new Connection();
         Statement stmt = c.createStatement();
-
         // given: create 2 tables
         stmt.execute("CREATE TABLE TABAAAA111 (id NUMBER)");
         stmt.execute("CREATE TABLE TABAAAA122 (id NUMBER)");
@@ -43,8 +42,6 @@ public class DatabaseMetaDataTest {
 
     @Test
     public void getColumnsByPattern() {
-
-        Connection c = new Connection();
         Statement stmt = c.createStatement();
 
         // given: create 2 tables
@@ -71,6 +68,11 @@ public class DatabaseMetaDataTest {
 
         // no more such columns
         assertFalse(rs.next());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        database.close();
     }
 
 }

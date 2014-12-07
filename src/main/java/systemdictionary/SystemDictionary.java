@@ -6,6 +6,7 @@ import datamodel.*;
 import executors.IteratorBasedResultSet;
 import storageapi.DataStoreException;
 import storageapi.Record;
+import storageapi.Storage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,48 +22,32 @@ import java.util.regex.Pattern;
  */
 public class SystemDictionary {
 
-    private static SystemDictionary INSTANCE;
+    private Storage storage; // TODO: every method of systemdisciotnary that is changing its state (content) should call at the end storage.writeSystemDict, notify storage on change (observer pattern) or similar.
 
-    public static synchronized SystemDictionary getInstance() {
-        if (INSTANCE==null) {
-            throw new IllegalStateException("trying to get reference to not initialized dictionary");
-        }
-        return INSTANCE;
-    }
+    private Map<Identifier, Table> registeredTables = new HashMap<>();
+
+    private ReadWriteLock tablesLock = new ReentrantReadWriteLock();
 
     public static synchronized SystemDictionary createEmptyDictionary() {
-        if (INSTANCE != null) {
-            throw new IllegalStateException("Trying to initialize already initialized system dictionary");
-        }
-        INSTANCE = new SystemDictionary();
-        return INSTANCE;
+        return new SystemDictionary();
     }
 
     /**
      * Loads system dictionary from storage
      */
     public static synchronized SystemDictionary loadSystemDictionary(File systemDictionaryFile) {
-        if (INSTANCE != null) {
-            throw new IllegalStateException("Trying to initialize already initialized system dictionary");
+        if (systemDictionaryFile.length() == 0) {
+            throw new IllegalStateException("Cannot load system dictionary from empty file");
         }
-
-        if (systemDictionaryFile.length() == 0) { // new database created, have to initialize itself as empty registry
-            INSTANCE = new SystemDictionary();
-        } else { // system dictionary file not empty -> boot itself from that file
-            try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(systemDictionaryFile))) {
-                INSTANCE = (SystemDictionary) input.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new DataStoreException("Unable to load system dictionary from disk file" + e);
-            }
+        // system dictionary file not empty -> boot itself from that file
+        try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(systemDictionaryFile))) {
+            return (SystemDictionary) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new DataStoreException("Unable to load system dictionary from disk file" + e);
         }
-        return INSTANCE;
     }
 
     private SystemDictionary() {}
-
-    private Map<Identifier, Table> registeredTables = new HashMap<>();
-
-    private ReadWriteLock tablesLock = new ReentrantReadWriteLock();
 
     public void registerTable(Table table) throws DataDictionaryException {
         tablesLock.writeLock().lock();

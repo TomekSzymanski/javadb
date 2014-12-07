@@ -28,7 +28,7 @@ public abstract class PageLoaderTest {
 
     @Test
     public void simpleEmptyPageWriteRead() {
-        Page originalPage = new Page(10, null, systemDictionaryStub);
+        Page originalPage = new Page(10, null, getLoaderInstance(), systemDictionaryStub);
         loader.writePageData(originalPage);
         Page loadedPage = loader.getPageData(originalPage.getPageId());
         assertEquals(originalPage, loadedPage);
@@ -51,7 +51,7 @@ public abstract class PageLoaderTest {
 
         when(systemDictionaryMock.getTableColumnsAsList(tableName)).thenReturn(columns);
 
-        Page originalPage = new Page(10, tableName, originalRecords, systemDictionaryMock);
+        Page originalPage = new Page(10, tableName, originalRecords, getLoaderInstance(), systemDictionaryMock);
         loader.writePageData(originalPage);
         Page loadedPage = loader.getPageData(originalPage.getPageId());
         assertEquals(originalPage, loadedPage);
@@ -65,7 +65,7 @@ public abstract class PageLoaderTest {
             originalRecords.add(RecordBuilder.newRecord().number(10).varchar("tomek").varchar("scsdcscds").bool(false).build());
         }
 
-        Page originalPage = new Page(10, null, originalRecords, systemDictionaryStub);
+        Page originalPage = new Page(10, null, originalRecords, getLoaderInstance(), systemDictionaryStub);
         loader.writePageData(originalPage);
         Page loadedPage = loader.getPageData(originalPage.getPageId());
         assertEquals(originalPage, loadedPage);
@@ -96,7 +96,7 @@ public abstract class PageLoaderTest {
 
         when(systemDictionaryMock.getTableColumnsAsList(tableName)).thenReturn(columns);
 
-        Page originalPage = new Page(10, tableName, originalRecords, systemDictionaryMock);
+        Page originalPage = new Page(10, tableName, originalRecords, getLoaderInstance(), systemDictionaryMock);
         loader.writePageData(originalPage);
         Page loadedPage = loader.getPageData(originalPage.getPageId());
         assertEquals(originalPage, loadedPage);

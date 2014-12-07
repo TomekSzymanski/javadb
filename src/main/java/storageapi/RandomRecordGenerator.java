@@ -27,8 +27,8 @@ public class RandomRecordGenerator {
 //        SQLDataType dataTypeValueFactory = null;
 //        for (int i = 0; i < numberOfFields; i++) {
 //            switch (rand.nextInt(2)) {
-//                case 0: dataTypeValueFactory = SQLNumberDataType.getInstance(); break;
-//                case 1: dataTypeValueFactory = SQLVarcharDataType.getInstance(rand.nextInt(100)); break;
+//                case 0: dataTypeValueFactory = SQLNumberDataType.newInstanceFromDisk(); break;
+//                case 1: dataTypeValueFactory = SQLVarcharDataType.newInstanceFromDisk(rand.nextInt(100)); break;
 //            }
 //            fieldDataTypeFactories.add(dataTypeValueFactory);
 //        }

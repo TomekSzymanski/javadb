@@ -37,16 +37,13 @@ import static datamodel.Column.Nullable.NULLABLE;
 
  */
 class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
-
-    private CreateTableCommand ast;
-
      /*
        <CREATE TABLE statement> ::= 'CREATE TABLE' <TABLE_NAME> <TABLE_ELEMENT_LIST>
 
        <TABLE_NAME> ::= <identifier>
      */
     CreateTableCommand parse(Tokenizer tokenizer) throws SQLParseException {
-        ast = new CreateTableCommand();
+        CreateTableCommand ast = new CreateTableCommand();
 
         expect(tokenizer, CREATE, "Create table statement does not contain CREATE TABLE clause");
         expect(tokenizer, TABLE, "Create table statement does not contain CREATE TABLE clause");
@@ -54,7 +51,7 @@ class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
         Identifier tableName = new Identifier(tokenizer.next());
         ast.setTableName(tableName);
 
-        parseTableElementList(tokenizer);
+        parseTableElementList(tokenizer, ast);
 
         return ast;
     }
@@ -63,9 +60,9 @@ class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
         <TABLE_ELEMENT_LIST> ::=  <left_paren> <TABLE_ELEMENT> [{<comma> <TABLE_ELEMENT>}] <right_paren>
 
      */
-    private void parseTableElementList(Tokenizer tokenizer) throws SQLParseException {
+    private void parseTableElementList(Tokenizer tokenizer, CreateTableCommand ast) throws SQLParseException {
         expect(tokenizer, LEFT_PAREN, "Left parenthesis expected before defining table columns");
-        parseTableElementTokens(tokenizer);
+        parseTableElementTokens(tokenizer, ast);
         expect(tokenizer, RIGHT_PAREN, "Right parenthesis expected after defining table columns");
     }
 
@@ -77,7 +74,7 @@ class CreateTableStatementParser extends AbstractSQLParser<CreateTableCommand> {
         <COLUMN_CONSTRAINT> ::= 'NOT NULL'
 
      */
-    private void parseTableElementTokens(Tokenizer tokenizer) throws SQLParseException {
+    private void parseTableElementTokens(Tokenizer tokenizer, CreateTableCommand ast) throws SQLParseException {
         if (!moreTokensAvailableOtherThanRightParenthesis(tokenizer)) {
             throw new SQLParseException("table definition must contain definition of at least one table column");
         }

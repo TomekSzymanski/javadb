@@ -13,9 +13,15 @@ import sqlparser.SelectCommand;
  */
 public class Statement {
 
+    private CommandExecutorFactory commandExecutorFactory;
+
     private ExecutionContext context;
 
     private SQLParserImpl sqlParser = new SQLParserImpl();
+
+    Statement(CommandExecutorFactory commandExecutorFactory) {
+        this.commandExecutorFactory = commandExecutorFactory;
+    }
 
     public int getNextFetchSize() {
         return context.nextFetchSize;
@@ -32,7 +38,7 @@ public class Statement {
      */
     public ResultSet executeQuery(String sql) throws SQLException {
         SelectCommand selectCommand = sqlParser.parseQuery(sql);
-        QueryCommandExecutor queryExecutor = CommandExecutorFactory.getQueryExecutorInstance();
+        QueryCommandExecutor queryExecutor = commandExecutorFactory.getQueryExecutorInstance();
         return queryExecutor.executeQuery(selectCommand, context);
     }
 
@@ -43,7 +49,7 @@ public class Statement {
      */
     public void executeUpdate(String sql) throws SQLException {
         AbstractSQLCommand SQLCommand = sqlParser.parse(sql);
-        CommandExecutor executor = CommandExecutorFactory.getInstance(SQLCommand.getType());
+        CommandExecutor executor = commandExecutorFactory.getInstance(SQLCommand.getType());
         executor.execute(SQLCommand);
     }
 

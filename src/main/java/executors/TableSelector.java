@@ -2,7 +2,6 @@ package executors;
 
 import clientapi.ResultSet;
 import datamodel.Identifier;
-import storageapi.CollectionBasedInMemoryStorage;
 import storageapi.Record;
 import storageapi.Storage;
 
@@ -16,13 +15,14 @@ import java.util.stream.Collectors;
  */
 class TableSelector implements QueryAssembly {
 
-    private static Storage storage = CollectionBasedInMemoryStorage.getInstance();
+    private static Storage storage;
     private Iterator<Record> tableIterator;
     private List<String> columnLabels = new ArrayList<>();
 
     private ExecutionContext context;
 
-    TableSelector(Identifier tableName, List<Identifier> columnList, ExecutionContext context) {
+    TableSelector(Storage storage, Identifier tableName, List<Identifier> columnList, ExecutionContext context) {
+        this.storage = storage;
         tableIterator = storage.tableIterator(tableName);
         columnLabels = columnList.stream().map(Identifier::getValue).collect(Collectors.toList());
         this.context = context;

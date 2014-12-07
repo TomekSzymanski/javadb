@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  */
 public class SystemDictionaryTest {
 
-    private static SystemDictionary dictionary = SystemDictionary.getInstance();
+    private static SystemDictionary dictionary = SystemDictionary.createEmptyDictionary();
 
     @Test
     public void getTables() {

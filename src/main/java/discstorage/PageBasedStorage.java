@@ -4,7 +4,6 @@ import datamodel.Identifier;
 import org.apache.commons.collections.iterators.IteratorChain;
 import org.apache.commons.lang3.Validate;
 import storageapi.DataStoreException;
-import storageapi.PersistentStorage;
 import storageapi.Record;
 import storageapi.Storage;
 import systemdictionary.SystemDictionary;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Created on 2014-11-13.
  */
-public class PageBasedStorage implements PersistentStorage {
+public class PageBasedStorage implements Storage {
 
     private static final String systemTablespaceFileName = "system.dat";
     private static final String pageRegistryFileName = "page_registry.dat";
@@ -30,7 +29,7 @@ public class PageBasedStorage implements PersistentStorage {
 
     private SystemDictionary systemDictionary;
 
-    private static PageBasedStorage INSTANCE;
+    private PageLoader diskLoader;
 
     private PageBasedStorage(String databaseDirectoryPath){
         // initialize tablespaces
@@ -38,53 +37,51 @@ public class PageBasedStorage implements PersistentStorage {
         if (!systemTablespaceFile.exists()) { // new database
             try {
                 systemTablespaceFile.createNewFile();
+                systemDictionary = SystemDictionary.createEmptyDictionary();
             } catch (IOException e) {
                 throw new DataStoreException(e);
             }
         } else {
             validateFilePrivileges(systemTablespaceFile);
+            systemDictionary = SystemDictionary.loadSystemDictionary(systemTablespaceFile); //TODO move this initialization to some main bootstram class, that will initialize whole database (will initialize storage, system dictionary, pools for parsers and executors, listeners and so on)
         }
-        systemDictionary = SystemDictionary.loadSystemDictionary(systemTablespaceFile); //TODO move this initialization to some main bootstram class, that will initialize whole database (will initialize storage, system dictionary, pools for parsers and executors, listeners and so on)
 
         // we initialize pageLoader before we initialize pageRegistry, as loader is needed for Pages (which are needed by Registry)
         dataFile = new File(databaseDirectoryPath, dataFileName);
-        DiskLoader.createNewLoader(dataFile);
+
+        diskLoader = new DiskLoader(dataFile);
 
         File pageRegistryFile = new File(databaseDirectoryPath, pageRegistryFileName);
-        pageRegistry = PageRegistry.loadFromDisk(pageRegistryFile, SystemDictionary.getInstance());
+        pageRegistry = PageRegistry.loadFromDisk(pageRegistryFile, systemDictionary, diskLoader); // TODO another singleton...
 
     }
 
-    public static void loadDatabaseFromDisk(String databaseDirectoryPath) {
+    public static Storage loadDatabaseFromDisk(String databaseDirectoryPath) {
         File databaseDirectory = new File(databaseDirectoryPath);
 
         Validate.isTrue(databaseDirectory.exists(), "Trying ot initialize database from non existent directory %s" + databaseDirectoryPath);
 
         Validate.isTrue(databaseDirectory.isDirectory(), "You have to provide directory to initialize database. %s is not directory", databaseDirectoryPath);
         validateDirectoryPrivilleges(databaseDirectory);
+        //TODO add checking if lock file exists
 
-        if (INSTANCE!= null) {
-            throw new IllegalStateException("Trying to initialize database from disk, while it has been already initialized");
-        }
-        INSTANCE = new PageBasedStorage(databaseDirectoryPath);
+        return new PageBasedStorage(databaseDirectoryPath);
     }
 
     /**
      * Provided directory on disk must either not exist (then it will be created) or exist and be empty
      * @param databaseDirectoryPath
      */
-    public static void createDatabaseOnDisk(String databaseDirectoryPath) { //TODO add support for max tablespace and directory size
+    public static Storage createDatabaseOnDisk(String databaseDirectoryPath) { //TODO add support for max tablespace and directory size
         File databaseDirectory = new File(databaseDirectoryPath);
         if (!databaseDirectory.exists()) {
             databaseDirectory.mkdir();
         } else {
             validateDirectoryPrivilleges(databaseDirectory);
+            //TODO add checking if lock file exists (.db or similar)
             // TODO Validate.isTrue(databaseDirectory.list().length == 0, "Provided directory %s to create database is not empty. You have to either provide path to directory to be created (not existing yet), or provide path to empty directory", databaseDirectoryPath);
         }
-        if (INSTANCE!= null) {
-            throw new IllegalStateException("Trying to initialize new database while database already exists");
-        }
-        INSTANCE = new PageBasedStorage(databaseDirectoryPath);
+        return new PageBasedStorage(databaseDirectoryPath);
     }
 
     private static void validateDirectoryPrivilleges(File databaseDirectory) {
@@ -98,14 +95,6 @@ public class PageBasedStorage implements PersistentStorage {
         Validate.isTrue(file.canRead(), "Missing privileges to read the file %s", file);
         Validate.isTrue(file.canWrite(), "Missing privileges to write the file %s", file);
 
-    }
-
-
-    public static Storage getInstance() {
-        if (INSTANCE==null) {
-            throw new IllegalStateException("Cannot get instance of not initialized storage object");
-        }
-        return INSTANCE;
     }
 
     @Override
@@ -150,10 +139,16 @@ public class PageBasedStorage implements PersistentStorage {
 
     @Override
     public void writeSystemDictionary(SystemDictionary dictionary) throws DataStoreException {
-        try (ObjectOutput output = new ObjectOutputStream(new FileOutputStream(systemTablespaceFile))) {
+        try (ObjectOutput output = new ObjectOutputStream(new FileOutputStream(systemTablespaceFile))) { // TODO streams opened for every single write
             output.writeObject(dictionary);
         } catch (IOException e) {
             throw new DataStoreException("Error writing system dictiionary to disk file", e);
         }
+    }
+
+    @Override
+    public void close() {
+        // add closing disk loader, when it is not more singleton
+
     }
 }
